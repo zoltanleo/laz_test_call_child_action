@@ -1,0 +1,73 @@
+object frmMain: TfrmMain
+  Left = 398
+  Height = 448
+  Top = 34
+  Width = 503
+  Caption = 'frmMain'
+  ClientHeight = 448
+  ClientWidth = 503
+  DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
+  OnCreate = FormCreate
+  object vst: TLazVirtualStringTree
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = lblExecName
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 10
+    Height = 428
+    Top = 10
+    Width = 298
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Around = 10
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.MainColumn = -1
+    TabOrder = 0
+  end
+  object lblExecName: TLabel
+    AnchorSideLeft.Control = vst
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 318
+    Height = 20
+    Top = 10
+    Width = 87
+    BorderSpacing.Around = 10
+    Caption = 'lblExecName'
+  end
+  object RadioGroup1: TRadioGroup
+    AnchorSideLeft.Control = lblExecName
+    AnchorSideTop.Control = lblExecName
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 318
+    Height = 131
+    Top = 40
+    Width = 175
+    Anchors = [akTop, akLeft, akRight]
+    AutoFill = True
+    BorderSpacing.Right = 10
+    Caption = 'RadioGroup1'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 106
+    ClientWidth = 171
+    Items.Strings = (
+      'child'
+      'detail'
+    )
+    TabOrder = 1
+    OnClick = RadioGroup1Click
+  end
+end
