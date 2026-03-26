@@ -26,20 +26,24 @@ type
   TRecArr = array of TMyRecord;
   TActArray = array of TAction;
 
+  // Тип callback-процедуры для отображения сообщений из обработчиков действий
+  TDisplayMessageProc = procedure(const AMessage: String) of object;
+
   { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
   TPseudoTreeClass = class
-  private
-
   protected
     FPseudoNodeArr: TRecArr;
     FActList: TActionList;
     FActArray: TActArray;
+    FOnDisplayMessage: TDisplayMessageProc;
   public
     constructor Create(aOwner: TComponent);
     destructor Destroy; override;
     property ActList: TActionList read FActList write FActList;
     property ActArray: TActArray read FActArray write FActArray;
     property PseudoNodeArr: TRecArr read FPseudoNodeArr write FPseudoNodeArr;
+    property OnDisplayMessage: TDisplayMessageProc read FOnDisplayMessage write FOnDisplayMessage; // Callback для отображения результата выполнения действия во внешнем контроле
+
     function GetActionByIndex(Index: SizeInt): TAction;
     function GetActionByName(const AName: String): TAction;
     function ActionCount: SizeInt;
@@ -166,7 +170,6 @@ begin
   Data^.ParentID := ParentID;
   Data^.ActionName := AActionName;
   Data^.Caption := ACaption;
-  //Data^.tsName := AtsName;
 end;
 
 class procedure TVirtStringTreeHelper.InitializeTree(aTree: TBaseVirtualTree);

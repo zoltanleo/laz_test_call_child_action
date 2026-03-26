@@ -16,6 +16,7 @@ type
   TChildPseudoClass = class(TPseudoTreeClass)
   public
     procedure GetPseudoTreeData; override;
+    procedure ActionExecute(Sender: TObject); // Обработчик выполнения действия
   end;
 
 implementation
@@ -32,8 +33,9 @@ var
     Act := TAction.Create(ActList);
     Act.Name := AName;
     Act.Caption := aCaption;
+    Act.OnExecute := @ActionExecute;// Назначаем обработчик события выполнения
 
-    // ← Сохраняем ссылку на действие в массив базового класса
+    // Сохраняем ссылку на действие в массив базового класса
     SetLength(FActArray, Length(FActArray) + 1);
     FActArray[High(FActArray)] := Act;
   end;
@@ -51,6 +53,14 @@ begin
   begin
     AddAction(PseudoNodeArr[i].ActionName, PseudoNodeArr[i].Caption);
   end;
+end;
+
+procedure TChildPseudoClass.ActionExecute(Sender: TObject);
+begin
+  if not Sender.InheritsFrom(TAction) then Exit;
+  // Передаём текст во внешний контрол через callback, если он назначен
+  if Assigned(FOnDisplayMessage) then
+    FOnDisplayMessage('Выполнено действие: ' + TAction(Sender).Caption);
 end;
 
 end.

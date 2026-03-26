@@ -26,15 +26,18 @@ type
     RadioGroup1: TRadioGroup;
     vst: TLazVirtualStringTree;
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure RadioGroup1Click(Sender: TObject);
   private
-    //FNodeDataArray: TNodeDataArray; // Храним экспортированные данные
+    FPseudoClass: TPseudoTreeClass;
     procedure ExecuteActionForNode(Node: PVirtualNode);
     procedure TreeAddToSelection(Sender: TBaseVirtualTree;Node: PVirtualNode);
     procedure TreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+    procedure DisplayActionMessage(const AMessage: String); // Отображает текст результата выполнения действия в lblExecName
   public
-
+    property PseudoClass: TPseudoTreeClass read FPseudoClass write FPseudoClass;
   end;
 
 var
@@ -52,10 +55,6 @@ uses
 { TfrmMain }
 
 procedure TfrmMain.FormCreate(Sender: TObject);
-var
-  i: SizeInt = 0;
-  Node: PVirtualNode = nil;
-  Data: PMyRecord = nil;
 begin
   with vst do
   begin
@@ -73,42 +72,37 @@ begin
     OnAddToSelection:= @TreeAddToSelection;
   end;
 
+end;
+
+procedure TfrmMain.FormDestroy(Sender: TObject);
+begin
+  if Assigned(FPseudoClass) then FPseudoClass.Free;
+end;
+
+procedure TfrmMain.FormShow(Sender: TObject);
+begin
   RadioGroup1.ItemIndex:= 0;
   RadioGroup1Click(Sender);
 end;
 
 procedure TfrmMain.RadioGroup1Click(Sender: TObject);
 var
-  RecArr: TRecArr;
   Node: PVirtualNode = nil;
-  PseudoClass: TPseudoTreeClass;
 begin
+  if Assigned(FPseudoClass) then FreeAndNil(FPseudoClass);
+
   case RadioGroup1.ItemIndex of
-    0:
-      begin
-        // Создаём экземпляр с приведением типа к базовому классу
-        PseudoClass := TChildPseudoClass.Create(Self);
-        try
-          PseudoClass.GetPseudoTreeData;
-          RecArr := PseudoClass.PseudoNodeArr;
-          TVirtStringTreeHelper.DeserializeTree(vst, RecArr);
-        finally
-          PseudoClass.Free;
-        end;
-      end;
+    0: PseudoClass := TChildPseudoClass.Create(Self);
     else
-      begin
-        // Создаём экземпляр с приведением типа к базовому классу
-        PseudoClass := TDetailPseudoClass.Create(Self);
-        try
-          PseudoClass.GetPseudoTreeData;
-          RecArr := PseudoClass.PseudoNodeArr;
-          TVirtStringTreeHelper.DeserializeTree(vst, RecArr);
-        finally
-          PseudoClass.Free;
-        end;
-      end;
+      PseudoClass := TDetailPseudoClass.Create(Self);
   end;
+
+  // Назначаем callback для отображения результата выполнения действия
+  PseudoClass.OnDisplayMessage := @DisplayActionMessage;
+
+  // Получаем данные и десериализуем дерево
+  PseudoClass.GetPseudoTreeData;
+  TVirtStringTreeHelper.DeserializeTree(vst, PseudoClass.PseudoNodeArr);
 
   if vst.RootNodeCount = 0 then Exit;
   vst.FullExpand;
@@ -120,17 +114,17 @@ end;
 procedure TfrmMain.ExecuteActionForNode(Node: PVirtualNode);
 var
   Data: PMyRecord = nil;
+  Act: TAction = nil;
 begin
   if not Assigned(Node) then Exit;
 
   Data := vst.GetNodeData(Node);
-  //if Assigned(Data) and Assigned(Data^.ActionRef) then
-  //begin
-  //  if Data^.ActionName.Enabled then
-  //    Data^.ActionRef.Execute
-  //  else
-  //    ShowMessage('Действие "' + Data^.Caption + '" недоступно');
-  //end;
+
+  // Ищем действие по имени из записи узла в массиве действий текущего класса
+  Act := PseudoClass.GetActionByName(Data^.ActionName);
+  if Assigned(Act) and Assigned(Act.OnExecute)
+    then Act.Execute
+    else lblExecName.Caption := 'обработчик не назначен';
 end;
 
 procedure TfrmMain.TreeAddToSelection(Sender: TBaseVirtualTree;
@@ -147,6 +141,11 @@ begin
   Data := Sender.GetNodeData(Node);
   if Assigned(Data) then
     CellText := Data^.Caption;
+end;
+
+procedure TfrmMain.DisplayActionMessage(const AMessage: String);
+begin
+  lblExecName.Caption := AMessage;
 end;
 
 end.

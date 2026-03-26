@@ -9,6 +9,8 @@ object frmMain: TfrmMain
   DesignTimePPI = 120
   LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
   object vst: TLazVirtualStringTree
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner

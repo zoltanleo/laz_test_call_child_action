@@ -4,6 +4,11 @@
 
 =====================================
 
+2026.03.27.1
+- the mechanism of calling the event handler associated with the node is implemented
+
+![](pict/02.gif)
+
 2026.03.26.2
 - a common TPseudoTreeClass class is highlighted with redefinition of inheritance in dependent modules.
 
