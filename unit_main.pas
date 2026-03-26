@@ -80,39 +80,39 @@ procedure TfrmMain.RadioGroup1Click(Sender: TObject);
 var
   RecArr: TRecArr;
   Node: PVirtualNode = nil;
+  PseudoClass: TPseudoTreeClass;
 begin
   case RadioGroup1.ItemIndex of
     0:
       begin
-        // Используем класс из unit_child
-        with unit_child.TPseudoClass.Create(Self) do
+        // Создаём экземпляр с приведением типа к базовому классу
+        PseudoClass := TChildPseudoClass.Create(Self);
         try
-          GetPseudoTreeData;
-          RecArr := PseudoNodeArr;
+          PseudoClass.GetPseudoTreeData;
+          RecArr := PseudoClass.PseudoNodeArr;
           TVirtStringTreeHelper.DeserializeTree(vst, RecArr);
         finally
-          Free;
+          PseudoClass.Free;
         end;
       end;
     else
       begin
-        // Используем класс из unit_detail
-        with unit_detail.TPseudoClass.Create(Self) do
+        // Создаём экземпляр с приведением типа к базовому классу
+        PseudoClass := TDetailPseudoClass.Create(Self);
         try
-          GetPseudoTreeData;
-          RecArr := PseudoNodeArr;
+          PseudoClass.GetPseudoTreeData;
+          RecArr := PseudoClass.PseudoNodeArr;
           TVirtStringTreeHelper.DeserializeTree(vst, RecArr);
         finally
-          Free;
+          PseudoClass.Free;
         end;
       end;
   end;
 
-  if (vst.RootNodeCount = 0) then Exit;
-
+  if vst.RootNodeCount = 0 then Exit;
   vst.FullExpand;
-  Node:= vst.GetFirst;
-  vst.Selected[Node]:= True;
+  Node := vst.GetFirst;
+  vst.Selected[Node] := True;
   if vst.CanSetFocus then vst.SetFocus;
 end;
 

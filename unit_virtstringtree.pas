@@ -10,6 +10,7 @@ uses
   , laz.VirtualTrees
   , LCLIntf
   , LCLType
+  , ActnList
   ;
 
 type
@@ -23,6 +24,22 @@ type
   end;
 
   TRecArr = array of TMyRecord;
+
+  { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
+  TPseudoTreeClass = class
+  private
+    FActList: TActionList;
+  protected
+    FPseudoNodeArr: TRecArr;
+  public
+    property PseudoNodeArr: TRecArr read FPseudoNodeArr write FPseudoNodeArr;
+    constructor Create(aOwner: TComponent);
+    destructor Destroy; override;
+    property ActList: TActionList read FActList;
+    procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
+    class procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
+      const aActionName, aCaption: String);
+  end;
 
   // Auxiliary classes for accessing protected fields
   TBaseVirtualTreeAccess = class(TBaseVirtualTree)
@@ -42,11 +59,40 @@ type
     class procedure InitializeTree(aTree: TBaseVirtualTree); // устанавливает NodeDataSize
     class procedure SerializeTree(aTree: TBaseVirtualTree; out aRecArr: TRecArr);
     class procedure DeserializeTree(aTree: TBaseVirtualTree; aRecArr: TRecArr);
-    class procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt; const aActionName, aCaption: String);
   end;
 
 
 implementation
+
+{ TPseudoTreeClass }
+
+constructor TPseudoTreeClass.Create(aOwner: TComponent);
+begin
+  inherited Create;
+  FActList := TActionList.Create(aOwner);
+end;
+
+destructor TPseudoTreeClass.Destroy;
+begin
+  FActList.Free;
+  inherited Destroy;
+end;
+
+class procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
+  aParentID: SizeInt; const aActionName, aCaption: String);
+var
+  tmpArr: TMyRecord;
+begin
+  with tmpArr do
+  begin
+    ID := aID;
+    ParentID := aParentID;
+    ActionName := aActionName;
+    Caption := aCaption;
+  end;
+  SetLength(aRecArr, Length(aRecArr) + 1);
+  aRecArr[High(aRecArr)] := tmpArr;
+end;
 
 class function TVirtStringTreeHelper.GetNodeDataSizeHelper: LongInt;
 begin
@@ -226,23 +272,6 @@ begin
   finally
     aTree.EndUpdate;
   end;
-end;
-
-class procedure TVirtStringTreeHelper.AddPseudoNode(var aRecArr: TRecArr;
-  const aID, aParentID: SizeInt; const aActionName, aCaption: String);
-var
-  tmpArr: TMyRecord;
-begin
-  with tmpArr do
-  begin
-    ID:= aID;
-    ParentID:= aParentID;
-    ActionName:= aActionName;
-    Caption:= aCaption;
-  end;
-
-  SetLength(aRecArr,Length(aRecArr) + 1);
-  aRecArr[High(aRecArr)]:= tmpArr;
 end;
 
 end.

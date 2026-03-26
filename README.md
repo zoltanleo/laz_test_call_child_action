@@ -4,6 +4,9 @@
 
 =====================================
 
+2026.03.26.2
+- a common TPseudoTreeClass class is highlighted with redefinition of inheritance in dependent modules.
+
 **Implemented serialization/deserialization of the structure**
 
 ![](pict/01.gif)
