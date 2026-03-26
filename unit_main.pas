@@ -13,7 +13,8 @@ uses
   , Dialogs
   , StdCtrls
   , laz.VirtualTrees
-  , ActnList, ExtCtrls
+  , ActnList
+  , ExtCtrls
   , unit_virtstringtree
   ;
 

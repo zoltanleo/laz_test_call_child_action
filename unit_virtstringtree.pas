@@ -24,18 +24,25 @@ type
   end;
 
   TRecArr = array of TMyRecord;
+  TActArray = array of TAction;
 
   { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
   TPseudoTreeClass = class
   private
-    FActList: TActionList;
+
   protected
     FPseudoNodeArr: TRecArr;
+    FActList: TActionList;
+    FActArray: TActArray;
   public
-    property PseudoNodeArr: TRecArr read FPseudoNodeArr write FPseudoNodeArr;
     constructor Create(aOwner: TComponent);
     destructor Destroy; override;
-    property ActList: TActionList read FActList;
+    property ActList: TActionList read FActList write FActList;
+    property ActArray: TActArray read FActArray write FActArray;
+    property PseudoNodeArr: TRecArr read FPseudoNodeArr write FPseudoNodeArr;
+    function GetActionByIndex(Index: SizeInt): TAction;
+    function GetActionByName(const AName: String): TAction;
+    function ActionCount: SizeInt;
     procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
     class procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
       const aActionName, aCaption: String);
@@ -76,6 +83,31 @@ destructor TPseudoTreeClass.Destroy;
 begin
   FActList.Free;
   inherited Destroy;
+end;
+
+function TPseudoTreeClass.GetActionByIndex(Index: SizeInt): TAction;
+begin
+  Result := nil;
+  if (Index >= 0) and (Index < Length(FActArray)) then
+    Result := FActArray[Index];
+end;
+
+function TPseudoTreeClass.GetActionByName(const AName: String): TAction;
+var
+  i: SizeInt;
+begin
+  Result := nil;
+  for i := 0 to High(FActArray) do
+    if Assigned(FActArray[i]) and (FActArray[i].Name = AName) then
+    begin
+      Result := FActArray[i];
+      Break;
+    end;
+end;
+
+function TPseudoTreeClass.ActionCount: SizeInt;
+begin
+  Result := Length(FActArray);
 end;
 
 class procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
