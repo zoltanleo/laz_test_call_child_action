@@ -30,6 +30,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure RadioGroup1Click(Sender: TObject);
   private
+    FTreeEntryCounter: SizeInt;//счетчик вхождения в дерево
     FPseudoClass: TPseudoTreeClass;
     procedure ExecuteActionForNode(Node: PVirtualNode);
     procedure TreeAddToSelection(Sender: TBaseVirtualTree;Node: PVirtualNode);
@@ -56,6 +57,8 @@ uses
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
+  FTreeEntryCounter:= 0;
+
   with vst do
   begin
     Header.AutoSizeIndex := 0;
@@ -72,6 +75,8 @@ begin
     OnAddToSelection:= @TreeAddToSelection;
   end;
 
+  RadioGroup1.AutoSize:= True;
+  RadioGroup1.Columns:= RadioGroup1.Items.Count;
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);
@@ -100,13 +105,13 @@ begin
   // Назначаем callback для отображения результата выполнения действия
   PseudoClass.OnDisplayMessage := @DisplayActionMessage;
 
-  // Получаем данные и десериализуем дерево
-  PseudoClass.GetPseudoTreeData;
-  TVirtStringTreeHelper.DeserializeTree(vst, PseudoClass.PseudoNodeArr);
+  PseudoClass.GetPseudoTreeData;//получаем данные
+  TVirtStringTreeHelper.DeserializeTree(vst, PseudoClass.ParentNodeArr);//десериализуем дерево
 
   if vst.RootNodeCount = 0 then Exit;
   vst.FullExpand;
   Node := vst.GetFirst;
+  FTreeEntryCounter:= 0;
   vst.Selected[Node] := True;
   if vst.CanSetFocus then vst.SetFocus;
 end;
@@ -117,6 +122,7 @@ var
   Act: TAction = nil;
 begin
   if not Assigned(Node) then Exit;
+  if (FTreeEntryCounter = 0) then Exit;
 
   Data := vst.GetNodeData(Node);
 
@@ -131,6 +137,7 @@ procedure TfrmMain.TreeAddToSelection(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 begin
   ExecuteActionForNode(Node);
+  Inc(FTreeEntryCounter);
 end;
 
 procedure TfrmMain.TreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -140,7 +147,7 @@ var
 begin
   Data := Sender.GetNodeData(Node);
   if Assigned(Data) then
-    CellText := Data^.Caption;
+    CellText := Data^.ValueCaption;
 end;
 
 procedure TfrmMain.DisplayActionMessage(const AMessage: String);

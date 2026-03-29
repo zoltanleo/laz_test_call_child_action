@@ -4,6 +4,11 @@
 
 =====================================
 
+2026.03.30.1
+- implemented the creation and calling of a child window from unit_child and returning the result to the main window
+
+![](pict/03.gif)
+
 2026.03.27.1
 - the mechanism of calling the event handler associated with the node is implemented
 

@@ -1,0 +1,60 @@
+object frmChildTree: TfrmChildTree
+  Left = 398
+  Height = 320
+  Top = 34
+  Width = 512
+  Caption = 'frmChildTree'
+  ClientHeight = 320
+  ClientWidth = 512
+  DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
+  OnCreate = FormCreate
+  OnShow = FormShow
+  object btnCancel: TButton
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 408
+    Height = 31
+    Top = 279
+    Width = 94
+    Anchors = [akRight, akBottom]
+    BorderSpacing.Around = 10
+    Caption = 'btnCancel'
+    TabOrder = 0
+    OnClick = btnCancelClick
+  end
+  object vst: TLazVirtualStringTree
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = btnCancel
+    Left = 10
+    Height = 259
+    Top = 10
+    Width = 492
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Around = 10
+    DefaultText = 'Node'
+    Header.AutoSizeIndex = 0
+    Header.Columns = <>
+    Header.MainColumn = -1
+    TabOrder = 1
+  end
+  object btnOK: TButton
+    AnchorSideRight.Control = btnCancel
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 304
+    Height = 31
+    Top = 279
+    Width = 94
+    Anchors = [akRight, akBottom]
+    BorderSpacing.Around = 10
+    Caption = 'btnOK'
+    TabOrder = 2
+    OnClick = btnOKClick
+  end
+end

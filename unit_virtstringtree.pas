@@ -11,6 +11,8 @@ uses
   , LCLIntf
   , LCLType
   , ActnList
+  , DB
+  , MemDs
   ;
 
 type
@@ -20,7 +22,9 @@ type
     ID: SizeInt;          //  tree node ID
     ParentID: SizeInt;    // contains the root node ID for the child node (-1 for the root node)
     ActionName: String;   // link-name of an Action in a custom ActList
-    Caption: String;      // node header
+    ValueCaption: String;      // node header
+    ValueProtocol: String;//значение для протокола
+    ValueHint: String;    //справочное пояснение к записи
   end;
 
   TRecArr = array of TMyRecord;
@@ -31,25 +35,36 @@ type
 
   { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
   TPseudoTreeClass = class
+  private
+
   protected
-    FPseudoNodeArr: TRecArr;
+    FAutoID: SizeInt;
+    FtmpMDS: TMemDataset;
+    FParentNodeArr: TRecArr;
+    FChildNodeArr: TRecArr;
     FActList: TActionList;
     FActArray: TActArray;
     FOnDisplayMessage: TDisplayMessageProc;
+    procedure mdsBeforeInsert(aDataSet: TDataSet);
   public
     constructor Create(aOwner: TComponent);
     destructor Destroy; override;
     property ActList: TActionList read FActList write FActList;
     property ActArray: TActArray read FActArray write FActArray;
-    property PseudoNodeArr: TRecArr read FPseudoNodeArr write FPseudoNodeArr;
+    property ParentNodeArr: TRecArr read FParentNodeArr write FParentNodeArr;//узлы родитеского дерева
+    property ChildNodeArr: TRecArr read FChildNodeArr write FChildNodeArr;//узлы дерева в дочерней форме
     property OnDisplayMessage: TDisplayMessageProc read FOnDisplayMessage write FOnDisplayMessage; // Callback для отображения результата выполнения действия во внешнем контроле
+    property tmpMDS: TMemDataset read FtmpMDS write FtmpMDS;
+    property AutoID: SizeInt read FAutoID;//псевдоинкремент для mds
 
     function GetActionByIndex(Index: SizeInt): TAction;
     function GetActionByName(const AName: String): TAction;
     function ActionCount: SizeInt;
+    procedure AddAction(const AName, aValueCaption: String; AOnExecute: TNotifyEvent = nil); // ← новый метод
     procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
-    class procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
+    procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
       const aActionName, aCaption: String);
+    procedure ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
   end;
 
   // Auxiliary classes for accessing protected fields
@@ -81,10 +96,28 @@ constructor TPseudoTreeClass.Create(aOwner: TComponent);
 begin
   inherited Create;
   FActList := TActionList.Create(aOwner);
+  FtmpMDS:= TMemDataset.Create(aOwner);
+  with tmpMDS do
+  begin
+    FieldDefs.Add('AutoID',ftInteger);//"автоинкремент" локального датасета
+    FieldDefs.Add('ID',ftInteger);
+    FieldDefs.Add('PARENT_ID',ftInteger);
+    FieldDefs.Add('VALUE_CAPTION',ftString,100);
+    FieldDefs.Add('VALUE_PROTOCOL',ftString,200);
+    FieldDefs.Add('VALUE_HINT',ftString,1000);
+
+    Active:= False;
+    CreateTable;
+    Filtered:= False;
+    BeforeInsert:= @mdsBeforeInsert;
+  end;
+
+  FAutoID:= 0;
 end;
 
 destructor TPseudoTreeClass.Destroy;
 begin
+  FtmpMDS.Free;
   FActList.Free;
   inherited Destroy;
 end;
@@ -114,7 +147,26 @@ begin
   Result := Length(FActArray);
 end;
 
-class procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
+procedure TPseudoTreeClass.AddAction(const AName, aValueCaption: String;
+  AOnExecute: TNotifyEvent);
+var
+  Act: TAction = nil;
+begin
+  Act := TAction.Create(FActList);
+  Act.Name    := AName;
+  Act.Caption := aValueCaption;
+  Act.OnExecute := AOnExecute;  // nil — если обработчик не нужен
+
+  SetLength(FActArray, Length(FActArray) + 1);
+  FActArray[High(FActArray)] := Act;
+end;
+
+procedure TPseudoTreeClass.mdsBeforeInsert(aDataSet: TDataSet);
+begin
+  Inc(FAutoID);
+end;
+
+procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption: String);
 var
   tmpArr: TMyRecord;
@@ -124,10 +176,33 @@ begin
     ID := aID;
     ParentID := aParentID;
     ActionName := aActionName;
-    Caption := aCaption;
+    ValueCaption := aCaption;
   end;
   SetLength(aRecArr, Length(aRecArr) + 1);
   aRecArr[High(aRecArr)] := tmpArr;
+end;
+
+procedure TPseudoTreeClass.ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
+var
+  idx: SizeInt = 0;
+begin
+  //SetLength(aNodeArr,0);
+  if (tmpMDS.RecordCount = 0) then Exit;
+
+  tmpMDS.First;
+
+  while not tmpMDS.EOF do
+  begin
+    SetLength(aNodeArr,Length(aNodeArr) + 1);
+    idx:= High(aNodeArr);
+    aNodeArr[idx].ID:= tmpMDS.Fields[1].AsInteger;//ID
+    aNodeArr[idx].ParentID:= tmpMDS.Fields[2].AsInteger;//PARENT_ID
+    aNodeArr[idx].ValueCaption:= tmpMDS.Fields[3].AsString;//VALUE_CAPTION
+    aNodeArr[idx].ValueProtocol:= tmpMDS.Fields[4].AsString;//VALUE_PROTOCOL
+    aNodeArr[idx].ValueHint:= tmpMDS.Fields[5].AsString;//VALUE_HINT
+
+    tmpMDS.Next;
+  end;
 end;
 
 class function TVirtStringTreeHelper.GetNodeDataSizeHelper: LongInt;
@@ -169,7 +244,7 @@ begin
   Data^.ID := aTree.AbsoluteIndex(Result);
   Data^.ParentID := ParentID;
   Data^.ActionName := AActionName;
-  Data^.Caption := ACaption;
+  Data^.ValueCaption := ACaption;
 end;
 
 class procedure TVirtStringTreeHelper.InitializeTree(aTree: TBaseVirtualTree);
