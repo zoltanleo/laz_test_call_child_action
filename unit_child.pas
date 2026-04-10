@@ -61,7 +61,7 @@ begin
     AppendRecord([AutoID,1,-1,'расположение','','', PtrInt(csUncheckedNormal), PtrInt(ctNone)]);
 
     AppendRecord([AutoID,2,1,'в грудной клетке','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,3,1,'в поддиафрагмальной области','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,3,1,'в поддиафрагмальной области','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
     AppendRecord([AutoID,4,1,'в поясничной области','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
     AppendRecord([AutoID,5,1,'в мезогастрии','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
     AppendRecord([AutoID,6,1,'в области подвздошной ямки','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
@@ -71,7 +71,7 @@ begin
     AppendRecord([AutoID,9,-1,'форма среза','','']);
     AppendRecord([AutoID,10,-1,'ровность контура','','']);
     AppendRecord([AutoID,11,-1,'четкость контура','','']);
-    AppendRecord([AutoID,12,-1,'размеры','','']);
+    AppendRecord([AutoID,12,-1,'размеры','','', PtrInt(csUncheckedNormal), PtrInt(ctCheckBox)]);
   end;
 end;
 
@@ -164,6 +164,7 @@ begin
   try
     tmpFrm.InputTreeArray:= ChildNodeArr;
     tmpFrm.ShowModal;
+
     if (tmpFrm.ModalResult = mrOK) then
     begin
 

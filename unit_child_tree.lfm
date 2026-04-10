@@ -25,7 +25,7 @@ object frmChildTree: TfrmChildTree
     TabOrder = 0
     OnClick = btnCancelClick
   end
-  object vst: TLazVirtualStringTree
+  object vstChildTree: TLazVirtualStringTree
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Splitter1
@@ -56,13 +56,13 @@ object frmChildTree: TfrmChildTree
     TabOrder = 2
     OnClick = btnOKClick
   end
-  object Memo1: TMemo
+  object mChildTree: TMemo
     AnchorSideLeft.Control = Splitter1
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = vst
+    AnchorSideTop.Control = vstChildTree
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = vst
+    AnchorSideBottom.Control = vstChildTree
     AnchorSideBottom.Side = asrBottom
     Left = 416
     Height = 409
@@ -77,8 +77,8 @@ object frmChildTree: TfrmChildTree
     TabOrder = 3
   end
   object Splitter1: TSplitter
-    AnchorSideTop.Control = vst
-    AnchorSideBottom.Control = vst
+    AnchorSideTop.Control = vstChildTree
+    AnchorSideBottom.Control = vstChildTree
     AnchorSideBottom.Side = asrBottom
     Left = 400
     Height = 409

@@ -48,6 +48,7 @@ type
     ValueChildIsDepend: Boolean; // дизейблить ли детей при отметке checkbox
     ValueSiblingIsDepend: Boolean; // дизейблить ли узлы этого же уровня при отметке checkbox
     ValueCheckedAccept: Boolean; // позволять ли "чекать"/помечать узел в рантайме
+    ValueIsDefault: Boolean;//является ли значение умолчательным (для ctRadioButton)
   end;
 
   TRecArr = array of TMyRecord;
@@ -90,12 +91,12 @@ type
                             const aActionName, aCaption, aProtocol, aHint: String;
                             aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
                             aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
-                            aCheckedAccept: Boolean = True);overload;
+                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False);overload;
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
                             const aActionName, aCaption: String;
                             aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
                             aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
-                            aCheckedAccept: Boolean = True); overload;
+                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False); overload;
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
                             const aActionName, aCaption, aProtocol, aHint: String);overload;
     procedure ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
@@ -145,6 +146,8 @@ begin
     FieldDefs.Add('VALUE_HINT',ftString,1000);
     FieldDefs.Add('VALUE_CHECK_STATE',ftInteger);
     FieldDefs.Add('VALUE_CHECK_TYPE',ftInteger);
+    FieldDefs.Add('VALUE_CHECKED_ACCEPT',ftBoolean);
+    FieldDefs.Add('VALUE_IS_DEFAULT',ftBoolean);
 
     Active:= False;
     CreateTable;
@@ -211,7 +214,7 @@ end;
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String;
   aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
-  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean);
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean);
 var
   tmpArr: TMyRecord;
 begin
@@ -228,6 +231,7 @@ begin
     ValueChildIsDepend:= aChildIsDepend;
     ValueSiblingIsDepend:= aSiblingIsDepend;
     ValueCheckedAccept:= aCheckedAccept;
+    ValueIsDefault:= aIsDefault;
   end;
   SetLength(aRecArr, Length(aRecArr) + 1);
   aRecArr[High(aRecArr)] := tmpArr;
@@ -236,17 +240,18 @@ end;
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption: String;
   aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
-  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean);
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean);
 begin
   AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
-                '', '', aCheckType, aCheckState, aChildIsDepend, aSiblingIsDepend, aCheckedAccept);
+                '', '', aCheckType, aCheckState, aChildIsDepend,
+                aSiblingIsDepend, aCheckedAccept, aIsDefault);
 end;
 
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String);
 begin
   AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
-                aProtocol, aHint, ctNone, csUncheckedNormal, False, False, True);
+                aProtocol, aHint, ctNone, csUncheckedNormal, False, False, True, False);
 end;
 
 procedure TPseudoTreeClass.ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
@@ -269,6 +274,8 @@ begin
     aNodeArr[idx].ValueHint:= tmpMDS.Fields[5].AsString;//VALUE_HINT
     aNodeArr[idx].ValueCheckState:= TCheckState(tmpMDS.Fields[6].AsInteger);//VALUE_CHECK_STATE
     aNodeArr[idx].ValueCheckType:= TCheckType(tmpMDS.Fields[7].AsInteger);//VALUE_CHECK_TYPE
+    aNodeArr[idx].ValueCheckedAccept:= tmpMDS.Fields[8].AsBoolean;//VALUE_CHECKED_ACCEPT
+    aNodeArr[idx].ValueIsDefault:= tmpMDS.Fields[9].AsBoolean;//VALUE_IS_DEFAULT
 
     tmpMDS.Next;
   end;
