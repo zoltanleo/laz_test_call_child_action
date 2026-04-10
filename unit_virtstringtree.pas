@@ -15,6 +15,24 @@ uses
   , MemDs
   ;
 
+const
+  CheckStateArr: array[TCheckState] of string = (
+    'csUncheckedNormal',   // csUncheckedNormal: unchecked and not pressed
+    'csUncheckedPressed',  // csUncheckedPressed: unchecked and pressed
+    'csCheckedNormal',     // csCheckedNormal: checked and not pressed
+    'csCheckedPressed',    // csCheckedPressed: checked and pressed
+    'csMixedNormal',       // csMixedNormal: 3-state, not pressed
+    'csMixedPressed'       // csMixedPressed: 3-state, pressed
+  );
+
+  CheckTypeArr: array[TCheckType] of string = (
+      'ctNone',
+      'ctTriStateCheckBox',
+      'ctCheckBox',
+      'ctRadioButton',
+      'ctButton'
+    );
+
 type
 
   PMyRecord = ^TMyRecord;
@@ -25,6 +43,11 @@ type
     ValueCaption: String;      // node header
     ValueProtocol: String;//значение для протокола
     ValueHint: String;    //справочное пояснение к записи
+    ValueCheckState: TCheckState;// csCheckedNormal/csUncheckedNormal/csMixedNormal
+    ValueCheckType: TCheckType;  // ctCheckBox/ctRadioButton/ctTriStateCheckBox
+    ValueChildIsDepend: Boolean; // дизейблить ли детей при отметке checkbox
+    ValueSiblingIsDepend: Boolean; // дизейблить ли узлы этого же уровня при отметке checkbox
+    ValueCheckedAccept: Boolean; // позволять ли "чекать"/помечать узел в рантайме
   end;
 
   TRecArr = array of TMyRecord;
@@ -56,15 +79,30 @@ type
     property OnDisplayMessage: TDisplayMessageProc read FOnDisplayMessage write FOnDisplayMessage; // Callback для отображения результата выполнения действия во внешнем контроле
     property tmpMDS: TMemDataset read FtmpMDS write FtmpMDS;
     property AutoID: SizeInt read FAutoID;//псевдоинкремент для mds
+    procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
+    procedure InstanceInit;virtual; abstract;//процедура инициализации наследника
 
     function GetActionByIndex(Index: SizeInt): TAction;
     function GetActionByName(const AName: String): TAction;
     function ActionCount: SizeInt;
-    procedure AddAction(const AName, aValueCaption: String; AOnExecute: TNotifyEvent = nil); // ← новый метод
-    procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
+    procedure AddAction(const AName, aValueCaption: String; AOnExecute: TNotifyEvent = nil);
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
-      const aActionName, aCaption: String);
+                            const aActionName, aCaption, aProtocol, aHint: String;
+                            aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
+                            aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
+                            aCheckedAccept: Boolean = True);overload;
+    procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
+                            const aActionName, aCaption: String;
+                            aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
+                            aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
+                            aCheckedAccept: Boolean = True); overload;
+    procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
+                            const aActionName, aCaption, aProtocol, aHint: String);overload;
     procedure ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
+    function CheckStateToString(ValueCheckState: TCheckState): string;
+    function StringToCheckState(const ValueString: string): TCheckState;
+    function CheckTypeToString(ValueCheckType: TCheckType): string;
+    function StringToCheckType(const ValueString: string): TCheckType;
   end;
 
   // Auxiliary classes for accessing protected fields
@@ -105,6 +143,8 @@ begin
     FieldDefs.Add('VALUE_CAPTION',ftString,100);
     FieldDefs.Add('VALUE_PROTOCOL',ftString,200);
     FieldDefs.Add('VALUE_HINT',ftString,1000);
+    FieldDefs.Add('VALUE_CHECK_STATE',ftInteger);
+    FieldDefs.Add('VALUE_CHECK_TYPE',ftInteger);
 
     Active:= False;
     CreateTable;
@@ -113,6 +153,8 @@ begin
   end;
 
   FAutoID:= 0;
+  InstanceInit;//инициализируем параметры экземпляра
+  GetPseudoTreeData;//строим псевдодерево для десериализации в родителе
 end;
 
 destructor TPseudoTreeClass.Destroy;
@@ -167,7 +209,9 @@ begin
 end;
 
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
-  aParentID: SizeInt; const aActionName, aCaption: String);
+  aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String;
+  aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean);
 var
   tmpArr: TMyRecord;
 begin
@@ -177,16 +221,39 @@ begin
     ParentID := aParentID;
     ActionName := aActionName;
     ValueCaption := aCaption;
+    ValueProtocol:= aProtocol;
+    ValueHint:= aHint;
+    ValueCheckState:= aCheckState;
+    ValueCheckType:= aCheckType;
+    ValueChildIsDepend:= aChildIsDepend;
+    ValueSiblingIsDepend:= aSiblingIsDepend;
+    ValueCheckedAccept:= aCheckedAccept;
   end;
   SetLength(aRecArr, Length(aRecArr) + 1);
   aRecArr[High(aRecArr)] := tmpArr;
+end;
+
+procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
+  aParentID: SizeInt; const aActionName, aCaption: String;
+  aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean);
+begin
+  AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
+                '', '', aCheckType, aCheckState, aChildIsDepend, aSiblingIsDepend, aCheckedAccept);
+end;
+
+procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
+  aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String);
+begin
+  AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
+                aProtocol, aHint, ctNone, csUncheckedNormal, False, False, True);
 end;
 
 procedure TPseudoTreeClass.ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
 var
   idx: SizeInt = 0;
 begin
-  //SetLength(aNodeArr,0);
+  SetLength(aNodeArr,0);
   if (tmpMDS.RecordCount = 0) then Exit;
 
   tmpMDS.First;
@@ -200,8 +267,55 @@ begin
     aNodeArr[idx].ValueCaption:= tmpMDS.Fields[3].AsString;//VALUE_CAPTION
     aNodeArr[idx].ValueProtocol:= tmpMDS.Fields[4].AsString;//VALUE_PROTOCOL
     aNodeArr[idx].ValueHint:= tmpMDS.Fields[5].AsString;//VALUE_HINT
+    aNodeArr[idx].ValueCheckState:= TCheckState(tmpMDS.Fields[6].AsInteger);//VALUE_CHECK_STATE
+    aNodeArr[idx].ValueCheckType:= TCheckType(tmpMDS.Fields[7].AsInteger);//VALUE_CHECK_TYPE
 
     tmpMDS.Next;
+  end;
+end;
+
+function TPseudoTreeClass.CheckStateToString(ValueCheckState: TCheckState
+  ): string;
+begin
+  Result := CheckStateArr[ValueCheckState];
+end;
+
+function TPseudoTreeClass.StringToCheckState(const ValueString: string): TCheckState;
+var
+  State: TCheckState;
+begin
+  Result := csUncheckedNormal;
+
+  for State := Low(TCheckState) to High(TCheckState) do
+  begin
+    if SameText(CheckStateArr[State], ValueString) then
+    begin
+      Result := State;
+      Exit;
+    end;
+  end;
+end;
+
+function TPseudoTreeClass.CheckTypeToString(ValueCheckType: TCheckType): string;
+begin
+  Result := CheckTypeArr[ValueCheckType];
+end;
+
+function TPseudoTreeClass.StringToCheckType(const ValueString: string
+  ): TCheckType;
+var
+  i: TCheckType;
+begin
+  // Значение по умолчанию, если строка не распознана
+  Result := ctNone;
+
+  for i := Low(TCheckType) to High(TCheckType) do
+  begin
+    if SameText(CheckTypeArr[i], ValueString) then
+    begin
+      Result := i;
+      Break;
+    end;
   end;
 end;
 

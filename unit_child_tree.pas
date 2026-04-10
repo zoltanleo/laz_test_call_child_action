@@ -12,6 +12,7 @@ uses
   , Graphics
   , Dialogs
   , StdCtrls
+  , ExtCtrls
   , LazUTF8
   , laz.VirtualTrees
   , unit_virtstringtree
@@ -25,6 +26,8 @@ type
     btnCancel: TButton;
     btnOK: TButton;
     LazVirtualStringTree1: TLazVirtualStringTree;
+    Memo1: TMemo;
+    Splitter1: TSplitter;
     vst: TLazVirtualStringTree;
     procedure btnCancelClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -34,15 +37,16 @@ type
     FInputTreeArray: TRecArr;
     FOutputText: String;
     procedure SetInputTreeArray(AValue: TRecArr);
-    procedure vstLocationAddToSelection(Sender: TBaseVirtualTree;
-      Node: PVirtualNode);
-    procedure vstLocationCollapsing(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; var Allowed: Boolean);
-    procedure vstLocationFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
-    procedure vstLocationGetNodeDataSize(Sender: TBaseVirtualTree;
-      var NodeDataSize: Integer);
-    procedure vstLocationGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure TreeChecking(Sender: TBaseVirtualTree; Node: PVirtualNode; var NewState: TCheckState; var Allowed: Boolean);
+    procedure TreeChecked(Sender: TBaseVirtualTree;  Node: PVirtualNode);
+    procedure TreeCollapsing(Sender: TBaseVirtualTree; Node: PVirtualNode; var Allowed: Boolean);
+    procedure TreeAddToSelection(Sender: TBaseVirtualTree;Node: PVirtualNode);
+    procedure TreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
+    procedure TreeInitNode(Sender: TBaseVirtualTree; ParentNode,
+      Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+    procedure TreeFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure TreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
   public
     property OutputText: String read FOutputText write FOutputText;
     property InputTreeArray: TRecArr read FInputTreeArray write SetInputTreeArray;
@@ -76,59 +80,28 @@ begin
 
   with vst do
   begin
-    HintMode := hmTooltip;
-    ShowHint := True;
-    DefaultNodeHeight := Canvas.TextHeight('W') * 3 div 2;
-    LineStyle:= lsSolid;
+    Header.AutoSizeIndex := 0;
+    Header.MainColumn := 0;
 
-    with Header do
-    begin
-      Columns.Clear;
-      Columns.Add;
-      Columns[0].Text := '';
 
-      AutoSizeIndex := 0;
-      Height := Canvas.TextHeight('W') * 3 div 2;
-      Options := Options + [hoAutoResize,
-                            hoOwnerDraw,
-                            hoShowHint,
-                            hoShowImages
-                            //, hoVisible
-                            ];
-      Height := Canvas.TextHeight('W') * 3 div 2;
+    with TreeOptions do begin
+      AutoOptions := AutoOptions + [toAutoScroll, toAutoSpanColumns, toAutoTristateTracking];
+      MiscOptions := MiscOptions + [toCheckSupport] - [toAcceptOLEDrop, toEditOnClick];
+      PaintOptions := PaintOptions - [toShowDropmark, toShowButtons];
+      TreeOptions.SelectionOptions := TreeOptions.SelectionOptions - [toMultiSelect];// Отключаем множественное выделение
     end;
 
-    with TreeOptions do
-    begin
-      AutoOptions := AutoOptions
-                    + [toAutoScroll
-                      , toAutoSpanColumns]
-                    - [];
+    // Важно: размер данных узла должен соответствовать TMyRecord;
+    RootNodeCount := 0;
 
-      MiscOptions := MiscOptions
-                    + [toCheckSupport]
-                    - [toAcceptOLEDrop
-                      , toEditOnClick];
-
-      PaintOptions := PaintOptions
-                    //+ [toShowButtons]
-                    - [toShowDropmark, toShowButtons ];
-
-      SelectionOptions := SelectionOptions
-                     + [toExtendedFocus
-                      , toFullRowSelect
-                      , toCenterScrollIntoView
-                      , toRestoreSelection
-                      , toAlwaysSelectNode]
-                    - [toMultiSelect];
-    end;
-
-    OnDblClick := @btnOKClick;
-    OnAddToSelection:= @vstLocationAddToSelection;
-    OnCollapsing:= @vstLocationCollapsing;
-    OnGetText:= @vstLocationGetText;
-    OnGetNodeDataSize:= @vstLocationGetNodeDataSize;
-    OnFreeNode:= @vstLocationFreeNode;
+    OnGetText:= @TreeGetText;
+    OnAddToSelection:= @TreeAddToSelection;
+    OnInitNode:= @TreeInitNode;
+    OnChecking:= @TreeChecking;
+    OnChecked:= @TreeChecked;
+    OnCollapsing:= @TreeCollapsing;
+    OnFreeNode:= @TreeFreeNode;
+    OnGetNodeDataSize:= @TreeGetNodeDataSize;
   end;
 end;
 
@@ -142,6 +115,13 @@ begin
 
   vst.FullExpand;
   Node:= vst.GetFirst;
+  while Assigned(Node) do
+  begin
+    vst.ReinitNode(Node,True);
+    Node:= Node^.NextSibling;
+  end;
+
+  Node:= vst.GetFirst;
   if Assigned(Node) then
   begin
     vst.Selected[node]:= True;
@@ -154,49 +134,83 @@ begin
   if (Length(AValue) > 0) then FInputTreeArray:= AValue;
 end;
 
-procedure TfrmChildTree.vstLocationAddToSelection(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
-var
-  Data: PMyRecord = nil;
+procedure TfrmChildTree.TreeChecking(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; var NewState: TCheckState; var Allowed: Boolean);
 begin
-  Data:= vst.GetNodeData(Node);
-  if not Assigned(Data)
-    then OutputText:= 'no data'
-    else OutputText:= Data^.ValueProtocol;
+//
 end;
 
-procedure TfrmChildTree.vstLocationCollapsing(Sender: TBaseVirtualTree;
+procedure TfrmChildTree.TreeChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+begin
+  Sender.Selected[Node]:= True;
+  Sender.FocusedNode:= Node;
+end;
+
+procedure TfrmChildTree.TreeCollapsing(Sender: TBaseVirtualTree;
   Node: PVirtualNode; var Allowed: Boolean);
 begin
   Allowed:= False;
 end;
 
-procedure TfrmChildTree.vstLocationFreeNode(Sender: TBaseVirtualTree;
+procedure TfrmChildTree.TreeAddToSelection(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
+var
+  Data: PMyRecord = nil;
 begin
-  if Assigned(Sender.GetNodeData(Node)) then
-    Finalize(PMyRecord(Sender.GetNodeData(Node))^);
+  Data:= vst.GetNodeData(Node);
+
+  if not Assigned(Data) then Exit;
+
+  case Node^.CheckType of
+    ctRadioButton:
+      begin
+        Data^.ValueCheckState:= csCheckedNormal;
+        Sender.ReinitNode(Node,True);
+      end
+  else ;
+  end;
+
+    //then OutputText:= 'no data'
+    //else OutputText:= Data^.ValueProtocol
 end;
 
-procedure TfrmChildTree.vstLocationGetNodeDataSize(Sender: TBaseVirtualTree;
-  var NodeDataSize: Integer);
-begin
-  NodeDataSize:= SizeOf(TMyRecord);
-end;
-
-procedure TfrmChildTree.vstLocationGetText(Sender: TBaseVirtualTree;
+procedure TfrmChildTree.TreeGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: String);
 var
   Data: PMyRecord = nil;
 begin
-  Data := vst.GetNodeData(Node);
-  if not Assigned(Data) then Exit;
+  Data := Sender.GetNodeData(Node);
+  if Assigned(Data) then
+    CellText := Data^.ValueCaption;
+end;
 
-  case Column of
-    0: CellText := Data^.ValueCaption;
-    else;
+procedure TfrmChildTree.TreeInitNode(Sender: TBaseVirtualTree; ParentNode,
+  Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+var
+  Data: PMyRecord = nil;
+begin
+  Data := Sender.GetNodeData(Node);
+  if Assigned(Data) then
+  begin
+    // Устанавливаем тип (чекбокс, радиокнопка или ничего)
+    Node^.CheckType:= Data^.ValueCheckType;
+
+    // Устанавливаем текущее состояние (отмечен/не отмечен)
+    Sender.CheckState[Node] := Data^.ValueCheckState;
   end;
+end;
+
+procedure TfrmChildTree.TreeFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+begin
+  if Assigned(Sender.GetNodeData(Node)) then Finalize(PMyRecord(Sender.GetNodeData(Node))^);
+end;
+
+procedure TfrmChildTree.TreeGetNodeDataSize(Sender: TBaseVirtualTree;
+  var NodeDataSize: Integer);
+begin
+  NodeDataSize:= SizeOf(TMyRecord);
 end;
 
 end.

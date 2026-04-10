@@ -1,11 +1,11 @@
 object frmChildTree: TfrmChildTree
   Left = 398
-  Height = 320
+  Height = 470
   Top = 34
-  Width = 512
+  Width = 879
   Caption = 'frmChildTree'
-  ClientHeight = 320
-  ClientWidth = 512
+  ClientHeight = 470
+  ClientWidth = 879
   DesignTimePPI = 120
   LCLVersion = '4.99.0.0'
   OnCreate = FormCreate
@@ -15,9 +15,9 @@ object frmChildTree: TfrmChildTree
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 408
+    Left = 775
     Height = 31
-    Top = 279
+    Top = 429
     Width = 94
     Anchors = [akRight, akBottom]
     BorderSpacing.Around = 10
@@ -28,13 +28,12 @@ object frmChildTree: TfrmChildTree
   object vst: TLazVirtualStringTree
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
+    AnchorSideRight.Control = Splitter1
     AnchorSideBottom.Control = btnCancel
     Left = 10
-    Height = 259
+    Height = 409
     Top = 10
-    Width = 492
+    Width = 380
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Around = 10
     DefaultText = 'Node'
@@ -47,14 +46,46 @@ object frmChildTree: TfrmChildTree
     AnchorSideRight.Control = btnCancel
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 304
+    Left = 671
     Height = 31
-    Top = 279
+    Top = 429
     Width = 94
     Anchors = [akRight, akBottom]
     BorderSpacing.Around = 10
     Caption = 'btnOK'
     TabOrder = 2
     OnClick = btnOKClick
+  end
+  object Memo1: TMemo
+    AnchorSideLeft.Control = Splitter1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = vst
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = vst
+    AnchorSideBottom.Side = asrBottom
+    Left = 416
+    Height = 409
+    Top = 10
+    Width = 453
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 10
+    BorderSpacing.Right = 10
+    Lines.Strings = (
+      'Memo1'
+    )
+    TabOrder = 3
+  end
+  object Splitter1: TSplitter
+    AnchorSideTop.Control = vst
+    AnchorSideBottom.Control = vst
+    AnchorSideBottom.Side = asrBottom
+    Left = 400
+    Height = 409
+    Top = 10
+    Width = 6
+    Align = alNone
+    Anchors = [akTop, akLeft, akBottom]
+    AutoSnap = False
   end
 end
