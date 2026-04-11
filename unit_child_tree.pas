@@ -35,7 +35,9 @@ type
     procedure FormShow(Sender: TObject);
   private
     FInputTreeArray: TRecArr;
+    FOnTestNodeArrReady: TTestNodeArrReadyFunc;
     FOutputText: String;
+    FTestNodeArr: TRecArr;
     procedure SetInputTreeArray(AValue: TRecArr);
     procedure TreeChecking(Sender: TBaseVirtualTree; Node: PVirtualNode; var NewState: TCheckState; var Allowed: Boolean);
     procedure TreeChecked(Sender: TBaseVirtualTree;  Node: PVirtualNode);
@@ -52,9 +54,12 @@ type
       TextType: TVSTTextType);
     procedure TreeAfterCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
       Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
+    procedure CollectCheckedNodes(aNode: PVirtualNode);
   public
     property OutputText: String read FOutputText write FOutputText;
     property InputTreeArray: TRecArr read FInputTreeArray write SetInputTreeArray;
+    property TestNodeArr: TRecArr read FTestNodeArr;
+    property OnTestNodeArrReady: TTestNodeArrReadyFunc read FOnTestNodeArrReady write FOnTestNodeArrReady;
   end;
 
 var
@@ -93,7 +98,10 @@ begin
       AutoOptions := AutoOptions + [toAutoScroll, toAutoSpanColumns, toAutoTristateTracking];
       MiscOptions := MiscOptions + [toCheckSupport] - [toAcceptOLEDrop, toEditOnClick];
       PaintOptions := PaintOptions - [toShowDropmark, toShowButtons];
-      TreeOptions.SelectionOptions := TreeOptions.SelectionOptions - [toMultiSelect];// Отключаем множественное выделение
+      TreeOptions.SelectionOptions := TreeOptions.SelectionOptions
+                                  + [toAlwaysSelectNode]
+                                  - [toMultiSelect] // Отключаем множественное выделение
+                                  ;
     end;
 
     // Важно: размер данных узла должен соответствовать TMyRecord;
@@ -128,12 +136,15 @@ begin
     Node:= Node^.NextSibling;
   end;
 
+  //vstChildTree.ClearSelection;
+  //
   Node:= vstChildTree.GetFirst;
   if Assigned(Node) then
   begin
     vstChildTree.Selected[node]:= True;
-    if vstChildTree.CanSetFocus then vstChildTree.SetFocus;
   end;
+
+  if vstChildTree.CanSetFocus then vstChildTree.SetFocus;
 end;
 
 procedure TfrmChildTree.SetInputTreeArray(AValue: TRecArr);
@@ -159,71 +170,85 @@ end;
 
 procedure TfrmChildTree.TreeChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
-  Data: PMyRecord = nil;
-  IsChecked: Boolean;
-  SiblingNode: PVirtualNode = nil;
+  //Data: PMyRecord = nil;
+  //IsChecked: Boolean;
+  //SiblingNode: PVirtualNode = nil;
+  aNode: PVirtualNode = nil;
 
   // Локальная процедура для обхода дочерних узлов
-  procedure SetChildrenDisabledState(ParentNode: PVirtualNode; Disable: Boolean);
-  var
-    ChildNode: PVirtualNode;
-  begin
-    // Получаем первого ребенка
-    ChildNode := Sender.GetFirstChild(ParentNode);
-    while Assigned(ChildNode) do
-    begin
-      // Включаем или выключаем узел
-      Sender.IsDisabled[ChildNode] := Disable;
-      //дизейблим всю иерархию рекурсивно (детей детей),
-       SetChildrenDisabledState(ChildNode, Disable);
-      // Переходим к следующему узлу на этом же уровне
-      ChildNode := ChildNode^.NextSibling;
-    end;
-  end;
+  //procedure SetChildrenDisabledState(ParentNode: PVirtualNode; Disable: Boolean);
+  //var
+  //  ChildNode: PVirtualNode;
+  //begin
+  //  // Получаем первого ребенка
+  //  ChildNode := Sender.GetFirstChild(ParentNode);
+  //  while Assigned(ChildNode) do
+  //  begin
+  //    // Включаем или выключаем узел
+  //    Sender.IsDisabled[ChildNode] := Disable;
+  //    //дизейблим всю иерархию рекурсивно (детей детей),
+  //     SetChildrenDisabledState(ChildNode, Disable);
+  //    // Переходим к следующему узлу на этом же уровне
+  //    ChildNode := ChildNode^.NextSibling;
+  //  end;
+  //end;
 begin
+  if (Node^.Parent = Sender.RootNode)
+    then aNode:= Sender.GetFirstChild(nil) //для Root
+    else aNode:= Sender.GetFirstChild(Node^.Parent);//для child'ов
+
+  while Assigned(aNode) do
+  begin
+    if (aNode <> Node) then Sender.Selected[aNode]:= False;
+    aNode:= aNode^.NextSibling;
+  end;
+
   Sender.Selected[Node]:= True;
   Sender.FocusedNode:= Node;
+  if Sender.CanSetFocus then Sender.SetFocus;
 
-  Data := Sender.GetNodeData(Node);
-  if not Assigned(Data) then Exit;
+  TreeAddToSelection(Sender, Node);
 
-  //Синхронизируем данные с новым состоянием в дереве
-  Data^.ValueCheckState := Sender.CheckState[Node];
-
-  //Если дети зависят от состояния родителя
-  if Data^.ValueChildIsDepend then
-  begin
-    //Проверяем, отмечен ли чекбокс (учитываем обычное и "нажатое" состояние)
-    IsChecked := (Data^.ValueCheckState = csCheckedNormal) or (Data^.ValueCheckState = csCheckedPressed);
-
-    //Если отмечен, то Disable = False (энейблим). Иначе Disable = True (дизейблим).
-    SetChildrenDisabledState(Node, not IsChecked);
-  end;
-
-  //Если узлы того же уровня зависят от состояния данного узла
-  if Data^.ValueSiblingIsDepend then
-  begin
-    // Узлы активны если текущий узел отмечен или в смешанном состоянии
-    IsChecked := (Data^.ValueCheckState = csCheckedNormal)
-              or (Data^.ValueCheckState = csCheckedPressed)
-              or (Data^.ValueCheckState = csMixedNormal)
-              or (Data^.ValueCheckState = csMixedPressed);
-
-    // Обходим всех братьев (sibling) текущего узла
-    // Первый брат — первый ребёнок родителя
-    if Assigned(Node^.Parent) then
-      SiblingNode := (Node^.Parent)^.FirstChild
-    else
-      SiblingNode := Sender.GetFirst;
-
-    while Assigned(SiblingNode) do
-    begin
-      // Пропускаем сам текущий узел
-      if (SiblingNode <> Node) then Sender.IsDisabled[SiblingNode] := not IsChecked;
-      if (SiblingNode^.ChildCount > 0) then SetChildrenDisabledState(SiblingNode, not IsChecked);
-      SiblingNode := SiblingNode^.NextSibling;
-    end;
-  end;
+  //Data := Sender.GetNodeData(Node);
+  //if not Assigned(Data) then Exit;
+  //
+  ////Синхронизируем данные с новым состоянием в дереве
+  //Data^.ValueCheckState := Sender.CheckState[Node];
+  //
+  ////Если дети зависят от состояния родителя
+  //if Data^.ValueChildIsDepend then
+  //begin
+  //  //Проверяем, отмечен ли чекбокс (учитываем обычное и "нажатое" состояние)
+  //  IsChecked := (Data^.ValueCheckState = csCheckedNormal) or (Data^.ValueCheckState = csCheckedPressed);
+  //
+  //  //Если отмечен, то Disable = False (энейблим). Иначе Disable = True (дизейблим).
+  //  SetChildrenDisabledState(Node, not IsChecked);
+  //end;
+  //
+  ////Если узлы того же уровня зависят от состояния данного узла
+  //if Data^.ValueSiblingIsDepend then
+  //begin
+  //  // Узлы активны если текущий узел отмечен или в смешанном состоянии
+  //  IsChecked := (Data^.ValueCheckState = csCheckedNormal)
+  //            or (Data^.ValueCheckState = csCheckedPressed)
+  //            or (Data^.ValueCheckState = csMixedNormal)
+  //            or (Data^.ValueCheckState = csMixedPressed);
+  //
+  //  // Обходим всех братьев (sibling) текущего узла
+  //  // Первый брат — первый ребёнок родителя
+  //  if Assigned(Node^.Parent) then
+  //    SiblingNode := (Node^.Parent)^.FirstChild
+  //  else
+  //    SiblingNode := Sender.GetFirst;
+  //
+  //  while Assigned(SiblingNode) do
+  //  begin
+  //    // Пропускаем сам текущий узел
+  //    if (SiblingNode <> Node) then Sender.IsDisabled[SiblingNode] := not IsChecked;
+  //    if (SiblingNode^.ChildCount > 0) then SetChildrenDisabledState(SiblingNode, not IsChecked);
+  //    SiblingNode := SiblingNode^.NextSibling;
+  //  end;
+  //end;
 end;
 
 procedure TfrmChildTree.TreeCollapsing(Sender: TBaseVirtualTree;
@@ -232,10 +257,10 @@ begin
   Allowed:= False;
 end;
 
-procedure TfrmChildTree.TreeAddToSelection(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
+procedure TfrmChildTree.TreeAddToSelection(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
   Data: PMyRecord = nil;
+  aNode: PVirtualNode = nil;
 begin
   Data:= vstChildTree.GetNodeData(Node);
 
@@ -250,8 +275,18 @@ begin
   else ;
   end;
 
-    //then OutputText:= 'no data'
-    //else OutputText:= Data^.ValueProtocol
+  if (Node^.ChildCount = 0) then
+  begin
+    aNode := Sender.GetFirst;
+    SetLength(FTestNodeArr, 0);
+    if Assigned(aNode) then CollectCheckedNodes(aNode);
+
+    if Assigned(FOnTestNodeArrReady) then
+    begin
+      mChildTree.Clear;
+      mChildTree.Text := FOnTestNodeArrReady(FTestNodeArr);
+    end;
+  end;
 end;
 
 procedure TfrmChildTree.TreeGetText(Sender: TBaseVirtualTree;
@@ -279,6 +314,7 @@ begin
     // Устанавливаем текущее состояние (отмечен/не отмечен)
     Sender.CheckState[Node] := Data^.ValueCheckState;
   end;
+
 end;
 
 procedure TfrmChildTree.TreeFreeNode(Sender: TBaseVirtualTree;
@@ -354,6 +390,32 @@ begin
           Triangle[2] := Point((CheckRect.Left + CheckRect.Right) div 2, CheckRect.Bottom - 5);
 
           TargetCanvas.Polygon(Triangle);
+    end;
+end;
+
+procedure TfrmChildTree.CollectCheckedNodes(aNode: PVirtualNode);
+var
+  Data: PMyRecord = nil;
+begin
+  while Assigned(aNode) do
+    begin
+      if (aNode^.ChildCount > 0) then //для узлов с детками
+        CollectCheckedNodes(vstChildTree.GetFirstChild(aNode)) else
+      begin
+        Data := vstChildTree.GetNodeData(aNode);
+        if Assigned(Data) then
+        begin
+          case Data^.ValueCheckType of
+            ctRadioButton, ctCheckBox:
+              if (Data^.ValueCheckState = csCheckedNormal) then
+              begin
+                SetLength(FTestNodeArr, Length(FTestNodeArr) + 1);
+                FTestNodeArr[High(FTestNodeArr)] := Data^;
+              end;
+          end;
+        end;
+      end;
+      aNode := aNode^.NextSibling;
     end;
 end;
 

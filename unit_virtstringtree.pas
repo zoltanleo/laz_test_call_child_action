@@ -57,6 +57,9 @@ type
   // Тип callback-процедуры для отображения сообщений из обработчиков действий
   TDisplayMessageProc = procedure(const AMessage: String) of object;
 
+  // Тип callback-функции: принимает массив узлов, возвращает итоговую строку
+  TTestNodeArrReadyFunc = function(const AArr: TRecArr): String of object;
+
   { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
   TPseudoTreeClass = class
   private
@@ -78,6 +81,7 @@ type
     property ParentNodeArr: TRecArr read FParentNodeArr write FParentNodeArr;//узлы родитеского дерева
     property ChildNodeArr: TRecArr read FChildNodeArr write FChildNodeArr;//узлы дерева в дочерней форме
     property OnDisplayMessage: TDisplayMessageProc read FOnDisplayMessage write FOnDisplayMessage; // Callback для отображения результата выполнения действия во внешнем контроле
+
     property tmpMDS: TMemDataset read FtmpMDS write FtmpMDS;
     property AutoID: SizeInt read FAutoID;//псевдоинкремент для mds
     procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
@@ -100,10 +104,6 @@ type
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
                             const aActionName, aCaption, aProtocol, aHint: String);overload;
     procedure ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
-    function CheckStateToString(ValueCheckState: TCheckState): string;
-    function StringToCheckState(const ValueString: string): TCheckState;
-    function CheckTypeToString(ValueCheckType: TCheckType): string;
-    function StringToCheckType(const ValueString: string): TCheckType;
   end;
 
   // Auxiliary classes for accessing protected fields
@@ -278,51 +278,6 @@ begin
     aNodeArr[idx].ValueIsDefault:= tmpMDS.Fields[9].AsBoolean;//VALUE_IS_DEFAULT
 
     tmpMDS.Next;
-  end;
-end;
-
-function TPseudoTreeClass.CheckStateToString(ValueCheckState: TCheckState
-  ): string;
-begin
-  Result := CheckStateArr[ValueCheckState];
-end;
-
-function TPseudoTreeClass.StringToCheckState(const ValueString: string): TCheckState;
-var
-  State: TCheckState;
-begin
-  Result := csUncheckedNormal;
-
-  for State := Low(TCheckState) to High(TCheckState) do
-  begin
-    if SameText(CheckStateArr[State], ValueString) then
-    begin
-      Result := State;
-      Exit;
-    end;
-  end;
-end;
-
-function TPseudoTreeClass.CheckTypeToString(ValueCheckType: TCheckType): string;
-begin
-  Result := CheckTypeArr[ValueCheckType];
-end;
-
-function TPseudoTreeClass.StringToCheckType(const ValueString: string
-  ): TCheckType;
-var
-  i: TCheckType;
-begin
-  // Значение по умолчанию, если строка не распознана
-  Result := ctNone;
-
-  for i := Low(TCheckType) to High(TCheckType) do
-  begin
-    if SameText(CheckTypeArr[i], ValueString) then
-    begin
-      Result := i;
-      Break;
-    end;
   end;
 end;
 

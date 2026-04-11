@@ -18,6 +18,7 @@ type
   { TChildPseudoClass - наследник TPseudoTreeClass }
   TChildPseudoClass = class(TPseudoTreeClass)
   private
+    FTestStr: String;
     // Отдельные обработчики для каждого Action
     procedure OnExecute_act1(Sender: TObject);
     procedure OnExecute_act11(Sender: TObject);
@@ -26,10 +27,12 @@ type
     procedure OnExecute_act3(Sender: TObject);
     procedure OnExecute_act4(Sender: TObject);
   public
+    property TestStr: String read FTestStr write FTestStr;
     procedure GetPseudoTreeData; override;
     procedure InstanceInit;override;
     procedure ActionExecute(Sender: TObject); // Обработчик выполнения действия
     procedure ActCallHintForm(Sender: TObject);//вызов дочерней формы
+    function GetTestString(const ANodeArr: TRecArr): String;
   end;
 
 implementation
@@ -58,7 +61,7 @@ procedure TChildPseudoClass.OnExecute_act11(Sender: TObject);
 begin
   with tmpMDS do
   begin
-    AppendRecord([AutoID,1,-1,'расположение','','', PtrInt(csUncheckedNormal), PtrInt(ctNone)]);
+    AppendRecord([AutoID,1,-1,'расположение','','']);
 
     AppendRecord([AutoID,2,1,'в грудной клетке','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
     AppendRecord([AutoID,3,1,'в поддиафрагмальной области','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
@@ -68,10 +71,31 @@ begin
     AppendRecord([AutoID,7,1,'в малом тазу','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
 
     AppendRecord([AutoID,8,-1,'смещаемость','','']);
-    AppendRecord([AutoID,9,-1,'форма среза','','']);
-    AppendRecord([AutoID,10,-1,'ровность контура','','']);
-    AppendRecord([AutoID,11,-1,'четкость контура','','']);
-    AppendRecord([AutoID,12,-1,'размеры','','', PtrInt(csUncheckedNormal), PtrInt(ctCheckBox)]);
+    AppendRecord([AutoID,9,8,'физиологическая','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
+    AppendRecord([AutoID,10,8,'до 2 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,11,8,'до 3 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,12,8,'более 3 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+
+
+    AppendRecord([AutoID,13,-1,'форма среза','','']);
+    AppendRecord([AutoID,14,13,'бобовидная','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
+    AppendRecord([AutoID,15,13,'фетальная дольчатость','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,16,13,'"горбатая" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,17,13,'"подковообразная" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,18,13,'"галетообразная" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,19,13,'L-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,20,13,'S-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,21,13,'I-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+
+    AppendRecord([AutoID,22,-1,'ровность контура','','']);
+    AppendRecord([AutoID,23,22,'ровные','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
+    AppendRecord([AutoID,24,22,'волнистые','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+
+    AppendRecord([AutoID,25,-1,'четкость контура','','']);
+    AppendRecord([AutoID,26,25,'четкие','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
+    AppendRecord([AutoID,27,25,'нечеткие','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+
+    AppendRecord([AutoID,28,-1,'размеры','','', PtrInt(csUncheckedNormal), PtrInt(ctCheckBox)]);
   end;
 end;
 
@@ -163,6 +187,7 @@ begin
   tmpFrm:= TfrmChildTree.Create(nil);
   try
     tmpFrm.InputTreeArray:= ChildNodeArr;
+    tmpFrm.OnTestNodeArrReady := @GetTestString; // передаём callback для обработки TestNodeArr
     tmpFrm.ShowModal;
 
     if (tmpFrm.ModalResult = mrOK) then
@@ -174,6 +199,20 @@ begin
   finally
     FreeAndNil(tmpFrm);
   end;
+end;
+
+function TChildPseudoClass.GetTestString(const ANodeArr: TRecArr): String;
+var
+  i: SizeInt = 0;
+begin
+  FTestStr := '';
+  for i := 0 to High(ANodeArr) do
+  begin
+    if (i > 0) then FTestStr := FTestStr + '~';
+    FTestStr := FTestStr + ANodeArr[i].ValueCaption;
+  end;
+
+  Result := FTestStr;
 end;
 
 end.

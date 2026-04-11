@@ -72,7 +72,7 @@ object frmChildTree: TfrmChildTree
     BorderSpacing.Left = 10
     BorderSpacing.Right = 10
     Lines.Strings = (
-      'Memo1'
+      'mChildTree'
     )
     TabOrder = 3
   end
