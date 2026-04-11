@@ -4,6 +4,10 @@
 
 =====================================
 
+2026.04.12.2
+- the code in TfrmChildTree has been adjusted.TreeChecked
+![](pict/05.gif)
+
 2026.04.12.1
 - implemented the ability to transfer the tree structure from TChildPseudoClass to TfrmChildTree, display selected nodes in memos.
 

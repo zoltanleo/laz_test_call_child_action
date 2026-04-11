@@ -170,85 +170,64 @@ end;
 
 procedure TfrmChildTree.TreeChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
-  //Data: PMyRecord = nil;
-  //IsChecked: Boolean;
-  //SiblingNode: PVirtualNode = nil;
+  Data: PMyRecord = nil;
+  SiblingNode: PVirtualNode = nil;
   aNode: PVirtualNode = nil;
-
-  // Локальная процедура для обхода дочерних узлов
-  //procedure SetChildrenDisabledState(ParentNode: PVirtualNode; Disable: Boolean);
-  //var
-  //  ChildNode: PVirtualNode;
-  //begin
-  //  // Получаем первого ребенка
-  //  ChildNode := Sender.GetFirstChild(ParentNode);
-  //  while Assigned(ChildNode) do
-  //  begin
-  //    // Включаем или выключаем узел
-  //    Sender.IsDisabled[ChildNode] := Disable;
-  //    //дизейблим всю иерархию рекурсивно (детей детей),
-  //     SetChildrenDisabledState(ChildNode, Disable);
-  //    // Переходим к следующему узлу на этом же уровне
-  //    ChildNode := ChildNode^.NextSibling;
-  //  end;
-  //end;
 begin
-  if (Node^.Parent = Sender.RootNode)
-    then aNode:= Sender.GetFirstChild(nil) //для Root
-    else aNode:= Sender.GetFirstChild(Node^.Parent);//для child'ов
+  // Обрабатываем только радиокнопки
+  if (Node^.CheckType <> ctRadioButton) then Exit;
 
-  while Assigned(aNode) do
+  // 1. Снимаем выделение и состояние checked со всех sibling-узлов того же родителя,
+  //    оставляем выделенным только текущий узел
+  if (Node^.Parent = Sender.RootNode) then
+    SiblingNode := Sender.GetFirst        // узлы верхнего уровня
+  else
+    SiblingNode := Node^.Parent^.FirstChild; // дочерние узлы того же родителя
+
+  while Assigned(SiblingNode) do
   begin
-    if (aNode <> Node) then Sender.Selected[aNode]:= False;
-    aNode:= aNode^.NextSibling;
+    if (SiblingNode <> Node) then
+    begin
+      Sender.Selected[SiblingNode] := False;
+      // Снимаем галку у sibling-радиокнопок через данные + ReinitNode,
+      // чтобы не вызывать OnChecked рекурсивно
+      Data := Sender.GetNodeData(SiblingNode);
+      if Assigned(Data) and (SiblingNode^.CheckType = ctRadioButton) then
+      begin
+        Data^.ValueCheckState := csUncheckedNormal;
+        Sender.ReinitNode(SiblingNode, False);
+      end;
+    end;
+    SiblingNode := SiblingNode^.NextSibling;
   end;
 
-  Sender.Selected[Node]:= True;
-  Sender.FocusedNode:= Node;
+  // Выделяем текущий узел
+  Sender.Selected[Node] := True;
+  Sender.FocusedNode := Node;
   if Sender.CanSetFocus then Sender.SetFocus;
 
-  TreeAddToSelection(Sender, Node);
+  // Фиксируем состояние текущего узла в данных и перерисовываем
+  Data := Sender.GetNodeData(Node);
+  if Assigned(Data) then
+  begin
+    Data^.ValueCheckState := csCheckedNormal;
+    Sender.ReinitNode(Node, True);
+  end;
 
-  //Data := Sender.GetNodeData(Node);
-  //if not Assigned(Data) then Exit;
-  //
-  ////Синхронизируем данные с новым состоянием в дереве
-  //Data^.ValueCheckState := Sender.CheckState[Node];
-  //
-  ////Если дети зависят от состояния родителя
-  //if Data^.ValueChildIsDepend then
-  //begin
-  //  //Проверяем, отмечен ли чекбокс (учитываем обычное и "нажатое" состояние)
-  //  IsChecked := (Data^.ValueCheckState = csCheckedNormal) or (Data^.ValueCheckState = csCheckedPressed);
-  //
-  //  //Если отмечен, то Disable = False (энейблим). Иначе Disable = True (дизейблим).
-  //  SetChildrenDisabledState(Node, not IsChecked);
-  //end;
-  //
-  ////Если узлы того же уровня зависят от состояния данного узла
-  //if Data^.ValueSiblingIsDepend then
-  //begin
-  //  // Узлы активны если текущий узел отмечен или в смешанном состоянии
-  //  IsChecked := (Data^.ValueCheckState = csCheckedNormal)
-  //            or (Data^.ValueCheckState = csCheckedPressed)
-  //            or (Data^.ValueCheckState = csMixedNormal)
-  //            or (Data^.ValueCheckState = csMixedPressed);
-  //
-  //  // Обходим всех братьев (sibling) текущего узла
-  //  // Первый брат — первый ребёнок родителя
-  //  if Assigned(Node^.Parent) then
-  //    SiblingNode := (Node^.Parent)^.FirstChild
-  //  else
-  //    SiblingNode := Sender.GetFirst;
-  //
-  //  while Assigned(SiblingNode) do
-  //  begin
-  //    // Пропускаем сам текущий узел
-  //    if (SiblingNode <> Node) then Sender.IsDisabled[SiblingNode] := not IsChecked;
-  //    if (SiblingNode^.ChildCount > 0) then SetChildrenDisabledState(SiblingNode, not IsChecked);
-  //    SiblingNode := SiblingNode^.NextSibling;
-  //  end;
-  //end;
+  // 2. Логика из TreeAddToSelection: для листовых узлов собираем отмеченные
+  //    и вызываем обратный вызов FOnTestNodeArrReady
+  if (Node^.ChildCount = 0) then
+  begin
+    aNode := Sender.GetFirst;
+    SetLength(FTestNodeArr, 0);
+    if Assigned(aNode) then CollectCheckedNodes(aNode);
+
+    if Assigned(FOnTestNodeArrReady) then
+    begin
+      mChildTree.Clear;
+      mChildTree.Text := FOnTestNodeArrReady(FTestNodeArr);
+    end;
+  end;
 end;
 
 procedure TfrmChildTree.TreeCollapsing(Sender: TBaseVirtualTree;

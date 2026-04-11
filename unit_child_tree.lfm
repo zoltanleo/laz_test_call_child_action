@@ -74,6 +74,7 @@ object frmChildTree: TfrmChildTree
     Lines.Strings = (
       'mChildTree'
     )
+    ScrollBars = ssAutoBoth
     TabOrder = 3
   end
   object Splitter1: TSplitter
