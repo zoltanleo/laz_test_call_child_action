@@ -38,6 +38,7 @@ type
     FOnTestNodeArrReady: TTestNodeArrReadyFunc;
     FOutputText: String;
     FTestNodeArr: TRecArr;
+    FIsInitializing: Boolean; // флаг: блокирует логику выделения во время инициализации дерева
     procedure SetInputTreeArray(AValue: TRecArr);
     procedure TreeChecking(Sender: TBaseVirtualTree; Node: PVirtualNode; var NewState: TCheckState; var Allowed: Boolean);
     procedure TreeChecked(Sender: TBaseVirtualTree;  Node: PVirtualNode);
@@ -87,6 +88,7 @@ begin
   Self.ModalResult:= mrCancel;
   SetLength(FInputTreeArray, 0);
   FOutputText:= 'no data';
+  FIsInitializing:= False;
 
   with vstChildTree do
   begin
@@ -124,27 +126,64 @@ procedure TfrmChildTree.FormShow(Sender: TObject);
 var
   Node: PVirtualNode = nil;
 begin
-  TVirtStringTreeHelper.DeserializeTree(vstChildTree, InputTreeArray);
+  {$REGION 'hint'}
+   // --- Фаза инициализации: блокируем OnChecked и OnAddToSelection ---
+   // Проблема: ReinitNode(Node, True) рекурсивно пересоздаёт все дочерние узлы.
+   // TreeInitNode устанавливает CheckState[Node] := csCheckedNormal для нескольких
+   // радиокнопок, что триггерит OnChecked → Selected[Node] := True для каждой из них.
+   // В итоге на момент показа формы выделены сразу несколько узлов.
+   // Флаг FIsInitializing блокирует эту цепочку и позволяет явно задать
+   // единственное выделение после полной инициализации дерева.
+  {$ENDREGION}
+  FIsInitializing := True;
+  try
+    TVirtStringTreeHelper.DeserializeTree(vstChildTree, InputTreeArray);
 
-  if (vstChildTree.RootNodeCount = 0) then Exit;
+    if (vstChildTree.RootNodeCount = 0) then Exit;
 
-  vstChildTree.FullExpand;
-  Node:= vstChildTree.GetFirst;
-  while Assigned(Node) do
-  begin
-    vstChildTree.ReinitNode(Node,True);
-    Node:= Node^.NextSibling;
+    vstChildTree.FullExpand;
+
+    Node := vstChildTree.GetFirst;
+    while Assigned(Node) do
+    begin
+      vstChildTree.ReinitNode(Node, True);
+      Node := Node^.NextSibling;
+    end;
+
+    // --- После инициализации: выделяем ровно один узел ---
+    vstChildTree.ClearSelection;
+    Node := vstChildTree.GetFirst;
+    if Assigned(Node) then
+      vstChildTree.Selected[Node] := True;
+
+    if vstChildTree.CanSetFocus then vstChildTree.SetFocus;
+  finally
+    FIsInitializing := False;
   end;
 
-  //vstChildTree.ClearSelection;
+
+
+  //TVirtStringTreeHelper.DeserializeTree(vstChildTree, InputTreeArray);
   //
-  Node:= vstChildTree.GetFirst;
-  if Assigned(Node) then
-  begin
-    vstChildTree.Selected[node]:= True;
-  end;
-
-  if vstChildTree.CanSetFocus then vstChildTree.SetFocus;
+  //if (vstChildTree.RootNodeCount = 0) then Exit;
+  //
+  //vstChildTree.FullExpand;
+  //Node:= vstChildTree.GetFirst;
+  //while Assigned(Node) do
+  //begin
+  //  vstChildTree.ReinitNode(Node,True);
+  //  Node:= Node^.NextSibling;
+  //end;
+  //
+  ////vstChildTree.ClearSelection;
+  ////
+  //Node:= vstChildTree.GetFirst;
+  //if Assigned(Node) then
+  //begin
+  //  vstChildTree.Selected[node]:= True;
+  //end;
+  //
+  //if vstChildTree.CanSetFocus then vstChildTree.SetFocus;
 end;
 
 procedure TfrmChildTree.SetInputTreeArray(AValue: TRecArr);
@@ -174,6 +213,10 @@ var
   SiblingNode: PVirtualNode = nil;
   aNode: PVirtualNode = nil;
 begin
+  // Во время инициализации дерева не обрабатываем смену состояния:
+  // CheckState выставляется из данных, это не пользовательское действие.
+  if FIsInitializing then Exit;
+
   // Обрабатываем только радиокнопки
   if (Node^.CheckType <> ctRadioButton) then Exit;
 
@@ -241,6 +284,10 @@ var
   Data: PMyRecord = nil;
   aNode: PVirtualNode = nil;
 begin
+  // Во время инициализации узлы выделяются программно через ReinitNode —
+  // не реагируем, чтобы не накапливать множественное выделение.
+  if FIsInitializing then Exit;
+
   Data:= vstChildTree.GetNodeData(Node);
 
   if not Assigned(Data) then Exit;

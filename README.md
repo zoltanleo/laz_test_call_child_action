@@ -4,6 +4,11 @@
 
 =====================================
 
+2026.04.12.3
+- implemented exclusively single node allocation in vstChildTree
+![](pict/06.gif)
+
+
 2026.04.12.2
 - the code in TfrmChildTree has been adjusted.TreeChecked
 ![](pict/05.gif)
