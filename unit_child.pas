@@ -19,6 +19,8 @@ type
   TChildPseudoClass = class(TPseudoTreeClass)
   private
     FTestStr: String;
+    FCurrentActionIdx: SizeInt; // индекс действия, вызвавшего заполнение vstChildTree
+
     // Отдельные обработчики для каждого Action
     procedure OnExecute_act1(Sender: TObject);
     procedure OnExecute_act11(Sender: TObject);
@@ -28,6 +30,7 @@ type
     procedure OnExecute_act4(Sender: TObject);
   public
     property TestStr: String read FTestStr write FTestStr;
+    property CurrentActionIdx: SizeInt read FCurrentActionIdx;
     procedure GetPseudoTreeData; override;
     procedure InstanceInit;override;
     procedure ActionExecute(Sender: TObject); // Обработчик выполнения действия
@@ -59,50 +62,72 @@ end;
 
 procedure TChildPseudoClass.OnExecute_act11(Sender: TObject);
 begin
+  //=== общие свойства ===
   with tmpMDS do
   begin
     AppendRecord([AutoID,1,-1,'расположение','','']);
 
-    AppendRecord([AutoID,2,1,'в грудной клетке','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,3,1,'в поддиафрагмальной области','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
-    AppendRecord([AutoID,4,1,'в поясничной области','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,5,1,'в мезогастрии','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,6,1,'в области подвздошной ямки','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,7,1,'в малом тазу','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,2,1,'в грудной клетке','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,3,1,'в поддиафрагмальной области','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,4,1,'в поясничной области','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,5,1,'в мезогастрии','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,6,1,'в области подвздошной ямки','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,7,1,'в малом тазу','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
     AppendRecord([AutoID,8,-1,'смещаемость','','']);
-    AppendRecord([AutoID,9,8,'физиологическая','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
-    AppendRecord([AutoID,10,8,'до 2 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,11,8,'до 3 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,12,8,'более 3 см','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,9,8,'физиологическая','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,10,8,'до 2 см','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,11,8,'до 3 см','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,12,8,'более 3 см','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
 
     AppendRecord([AutoID,13,-1,'форма среза','','']);
-    AppendRecord([AutoID,14,13,'бобовидная','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
-    AppendRecord([AutoID,15,13,'фетальная дольчатость','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,16,13,'"горбатая" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,17,13,'"подковообразная" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,18,13,'"галетообразная" почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,19,13,'L-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,20,13,'S-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
-    AppendRecord([AutoID,21,13,'I-образная почка','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,14,13,'бобовидная','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,15,13,'фетальная дольчатость','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,16,13,'"горбатая" почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,17,13,'"подковообразная" почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,18,13,'"галетообразная" почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,19,13,'L-образная почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,20,13,'S-образная почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,21,13,'I-образная почка','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
     AppendRecord([AutoID,22,-1,'ровность контура','','']);
-    AppendRecord([AutoID,23,22,'ровные','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
-    AppendRecord([AutoID,24,22,'волнистые','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,23,22,'ровные','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,24,22,'волнистые','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
     AppendRecord([AutoID,25,-1,'четкость контура','','']);
-    AppendRecord([AutoID,26,25,'четкие','','', PtrInt(csCheckedNormal), PtrInt(ctRadioButton), True, True]);
-    AppendRecord([AutoID,27,25,'нечеткие','','', PtrInt(csUncheckedNormal), PtrInt(ctRadioButton)]);
+    AppendRecord([AutoID,26,25,'четкие','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,27,25,'нечеткие','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
-    AppendRecord([AutoID,28,-1,'размеры','','', PtrInt(csUncheckedNormal), PtrInt(ctCheckBox)]);
+    AppendRecord([AutoID,28,-1,'размеры','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal)]);
   end;
 end;
 
 procedure TChildPseudoClass.OnExecute_act12(Sender: TObject);
 begin
-  if Assigned(FOnDisplayMessage) then
-    FOnDisplayMessage('Выполнено: ' + TAction(Sender).Caption + ' (дочерний узел act1)');
+  //=== капсула почки ===
+  with tmpMDS do
+  begin
+    AppendRecord([AutoID,1,-1,'толщина контура','','']);
+    AppendRecord([AutoID,2, 1,'равномерная','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,3, 1,'неравномерная','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+
+    AppendRecord([AutoID,4,-1,'эхогенность','','']);
+    AppendRecord([AutoID,5, 4,'гиперэхогенная','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,6, 4,'изоэхогенная','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+    AppendRecord([AutoID,7, 4,'гипоэхогенная','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+
+
+    AppendRecord([AutoID,8,-1,'целостность','','']);
+    AppendRecord([AutoID,9, 8,'прослеживается на всем протяжении контура','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
+    AppendRecord([AutoID,10,8,'не прослеживается в области верхнего полюса','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+    AppendRecord([AutoID,11,8,'не прослеживается в области средней трети','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+    AppendRecord([AutoID,12,8,'не прослеживается в области нижней трети','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+    AppendRecord([AutoID,13,8,'не прослеживается на всем протяжении','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
+
+    AppendRecord([AutoID,14,-1,'толщина (мм)','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal)]);
+
+  end;
 end;
 
 procedure TChildPseudoClass.OnExecute_act13(Sender: TObject);
@@ -176,6 +201,7 @@ begin
     Exit;
   end;
 
+  FCurrentActionIdx := idx; // запоминаем вызвавшее действие для GetTestString
   ConvertDataToChildNodeArr(FChildNodeArr);
   ActCallHintForm(Sender);
 end;
@@ -206,10 +232,29 @@ var
   i: SizeInt = 0;
 begin
   FTestStr := '';
-  for i := 0 to High(ANodeArr) do
-  begin
-    if (i > 0) then FTestStr := FTestStr + '~';
-    FTestStr := FTestStr + ANodeArr[i].ValueCaption;
+
+  case FCurrentActionIdx of
+    1: // OnExecute_act11 — конкатенация через '~'
+      begin
+        for i := 0 to High(ANodeArr) do
+        begin
+          if (i > 0) then FTestStr := FTestStr + '~ ';
+          FTestStr := FTestStr + ANodeArr[i].ValueCaption;
+        end;
+      end;
+
+    2: // OnExecute_act12 — фиксированный результат
+      begin
+        FTestStr := 'OnExecute_act12(Sender)';
+      end;
+
+  else
+    // Поведение по умолчанию для остальных действий — конкатенация через пробел
+    for i := 0 to High(ANodeArr) do
+    begin
+      if (i > 0) then FTestStr := FTestStr + ' ';
+      FTestStr := FTestStr + ANodeArr[i].ValueCaption;
+    end;
   end;
 
   Result := FTestStr;

@@ -43,8 +43,8 @@ type
     ValueCaption: String;      // node header
     ValueProtocol: String;//значение для протокола
     ValueHint: String;    //справочное пояснение к записи
-    ValueCheckState: TCheckState;// csCheckedNormal/csUncheckedNormal/csMixedNormal
     ValueCheckType: TCheckType;  // ctCheckBox/ctRadioButton/ctTriStateCheckBox
+    ValueCheckState: TCheckState;// csCheckedNormal/csUncheckedNormal/csMixedNormal
     ValueChildIsDepend: Boolean; // дизейблить ли детей при отметке checkbox
     ValueSiblingIsDepend: Boolean; // дизейблить ли узлы этого же уровня при отметке checkbox
     ValueCheckedAccept: Boolean; // позволять ли "чекать"/помечать узел в рантайме
@@ -144,8 +144,8 @@ begin
     FieldDefs.Add('VALUE_CAPTION',ftString,100);
     FieldDefs.Add('VALUE_PROTOCOL',ftString,200);
     FieldDefs.Add('VALUE_HINT',ftString,1000);
-    FieldDefs.Add('VALUE_CHECK_STATE',ftInteger);
     FieldDefs.Add('VALUE_CHECK_TYPE',ftInteger);
+    FieldDefs.Add('VALUE_CHECK_STATE',ftInteger);
     FieldDefs.Add('VALUE_CHECKED_ACCEPT',ftBoolean);
     FieldDefs.Add('VALUE_IS_DEFAULT',ftBoolean);
 
@@ -272,8 +272,8 @@ begin
     aNodeArr[idx].ValueCaption:= tmpMDS.Fields[3].AsString;//VALUE_CAPTION
     aNodeArr[idx].ValueProtocol:= tmpMDS.Fields[4].AsString;//VALUE_PROTOCOL
     aNodeArr[idx].ValueHint:= tmpMDS.Fields[5].AsString;//VALUE_HINT
-    aNodeArr[idx].ValueCheckState:= TCheckState(tmpMDS.Fields[6].AsInteger);//VALUE_CHECK_STATE
-    aNodeArr[idx].ValueCheckType:= TCheckType(tmpMDS.Fields[7].AsInteger);//VALUE_CHECK_TYPE
+    aNodeArr[idx].ValueCheckType:= TCheckType(tmpMDS.Fields[6].AsInteger);//VALUE_CHECK_TYPE
+    aNodeArr[idx].ValueCheckState:= TCheckState(tmpMDS.Fields[7].AsInteger);//VALUE_CHECK_STATE
     aNodeArr[idx].ValueCheckedAccept:= tmpMDS.Fields[8].AsBoolean;//VALUE_CHECKED_ACCEPT
     aNodeArr[idx].ValueIsDefault:= tmpMDS.Fields[9].AsBoolean;//VALUE_IS_DEFAULT
 

@@ -4,6 +4,9 @@
 
 =====================================
 
+2026.04.12.4
+- implemented a single GetTestString handler for all actions of TChildPseudoClass.OnExecute_act (xxx)
+
 2026.04.12.3
 - implemented exclusively single node allocation in vstChildTree
 ![](pict/06.gif)
