@@ -1,0 +1,195 @@
+object frmDimensionSimple: TfrmDimensionSimple
+  Left = 398
+  Height = 202
+  Top = 34
+  Width = 589
+  Caption = 'frmDimensionSimple'
+  ClientHeight = 202
+  ClientWidth = 589
+  DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
+  OnClose = FormClose
+  OnDeactivate = FormDeactivate
+  object Panel1: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 63
+    Top = 0
+    Width = 589
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Panel1'
+    ClientHeight = 63
+    ClientWidth = 589
+    Color = clMoneyGreen
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 0
+    object trbSingDimW: TTrackBar
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 28
+      Top = 10
+      Width = 287
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 0
+    end
+    object edtSingDimW: TEdit
+      AnchorSideRight.Control = lblSingDimWUnit
+      Left = 373
+      Height = 28
+      Top = 10
+      Width = 63
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 20
+      TabOrder = 1
+      Text = 'edtSingDimW'
+    end
+    object lblSingDimWUnit: TLabel
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW
+      AnchorSideBottom.Side = asrCenter
+      Left = 441
+      Height = 20
+      Top = 14
+      Width = 22
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Caption = 'мм'
+    end
+  end
+  object Panel2: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Panel1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 63
+    Top = 63
+    Width = 589
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Panel2'
+    ClientHeight = 63
+    ClientWidth = 589
+    Color = clMoneyGreen
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 1
+    object trbSingDimW1: TTrackBar
+      AnchorSideTop.Control = edtSingDimW1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW1
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 28
+      Top = 10
+      Width = 287
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 0
+    end
+    object edtSingDimW1: TEdit
+      AnchorSideRight.Control = lblSingDimWUnit1
+      Left = 373
+      Height = 28
+      Top = 10
+      Width = 63
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 20
+      TabOrder = 1
+      Text = 'edtSingDimW'
+    end
+    object lblSingDimWUnit1: TLabel
+      AnchorSideTop.Control = edtSingDimW1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW1
+      AnchorSideBottom.Side = asrCenter
+      Left = 441
+      Height = 20
+      Top = 14
+      Width = 22
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Caption = 'мм'
+    end
+  end
+  object Panel3: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Panel2
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 0
+    Height = 63
+    Top = 126
+    Width = 589
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Panel3'
+    ClientHeight = 63
+    ClientWidth = 589
+    Color = clMoneyGreen
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 2
+    object trbSingDimW2: TTrackBar
+      AnchorSideTop.Control = edtSingDimW2
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW2
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 28
+      Top = 10
+      Width = 287
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 0
+    end
+    object edtSingDimW2: TEdit
+      AnchorSideRight.Control = lblSingDimWUnit2
+      Left = 373
+      Height = 28
+      Top = 10
+      Width = 63
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 20
+      TabOrder = 1
+      Text = 'edtSingDimW'
+    end
+    object lblSingDimWUnit2: TLabel
+      AnchorSideTop.Control = edtSingDimW2
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW2
+      AnchorSideBottom.Side = asrCenter
+      Left = 441
+      Height = 20
+      Top = 14
+      Width = 22
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Caption = 'мм'
+    end
+  end
+end

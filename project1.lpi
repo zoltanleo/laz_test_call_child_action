@@ -101,6 +101,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
+      <Unit>
+        <Filename Value="unit_dimension_simple.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmDimensionSimple"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

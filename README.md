@@ -5,6 +5,11 @@
 =====================================
 
 2026.04.12.4
+- the functionality of the pseudo hint window with the return of some value to the tree is implemented
+
+![](pict/07.gif)
+
+2026.04.12.4
 - implemented a single GetTestString handler for all actions of TChildPseudoClass.OnExecute_act (xxx)
 
 2026.04.12.3

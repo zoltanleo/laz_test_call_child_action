@@ -1,0 +1,555 @@
+object frmFrameDimension: TfrmFrameDimension
+  Left = 398
+  Height = 480
+  Top = 34
+  Width = 933
+  Caption = 'frmFrameDimension'
+  ClientHeight = 480
+  ClientWidth = 933
+  DesignTimePPI = 120
+  LCLVersion = '4.99.0.0'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  object bvlChoice: TBevel
+    AnchorSideLeft.Control = Owner
+    AnchorSideLeft.Side = asrCenter
+    AnchorSideTop.Control = sbtnSingleness
+    AnchorSideBottom.Control = sbtnSingleness
+    AnchorSideBottom.Side = asrBottom
+    Left = 447
+    Height = 28
+    Top = 10
+    Width = 39
+    Anchors = [akTop, akLeft, akBottom]
+  end
+  object gbSingleness: TGroupBox
+    AnchorSideLeft.Control = sbtnSingleness
+    AnchorSideTop.Control = sbtnSingleness
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = sbtnSingleness
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = pnlButtons
+    Left = 10
+    Height = 349
+    Top = 48
+    Width = 432
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Bottom = 20
+    Caption = 'gbSingleness'
+    ClientHeight = 324
+    ClientWidth = 428
+    TabOrder = 0
+    object lblSingDimW: TLabel
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = edtSingDimW
+      Left = 267
+      Height = 20
+      Top = 14
+      Width = 56
+      Anchors = [akTop, akRight]
+      Caption = 'ширина'
+    end
+    object lblSingDimH: TLabel
+      AnchorSideTop.Control = edtSingDimH
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 274
+      Height = 20
+      Top = 62
+      Width = 49
+      Anchors = [akTop, akRight]
+      Caption = 'высота'
+    end
+    object lblSingDimTh: TLabel
+      AnchorSideTop.Control = edtSingDimTh
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 262
+      Height = 20
+      Top = 110
+      Width = 61
+      Anchors = [akTop, akRight]
+      Caption = 'толщина'
+    end
+    object lblSingDimV: TLabel
+      AnchorSideTop.Control = edtSingDimV
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 277
+      Height = 20
+      Top = 228
+      Width = 46
+      Anchors = [akTop, akRight]
+      Caption = 'объем'
+    end
+    object edtSingDimW: TEdit
+      AnchorSideTop.Control = gbSingleness
+      AnchorSideRight.Control = lblSingDimWUnit
+      Left = 328
+      Height = 28
+      Top = 10
+      Width = 63
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 20
+      TabOrder = 1
+      Text = 'edtSingDimW'
+      OnEditingDone = edtSingDimWEditingDone
+      OnKeyPress = edtSingDimWKeyPress
+    end
+    object edtSingDimH: TEdit
+      AnchorSideLeft.Control = edtSingDimW
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = edtSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 328
+      Height = 28
+      Top = 58
+      Width = 63
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 20
+      BorderSpacing.Bottom = 10
+      TabOrder = 3
+      Text = 'edtSingDimH'
+    end
+    object edtSingDimTh: TEdit
+      AnchorSideLeft.Control = edtSingDimW
+      AnchorSideTop.Control = edtSingDimH
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = edtSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 328
+      Height = 28
+      Top = 106
+      Width = 63
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 20
+      BorderSpacing.Bottom = 20
+      TabOrder = 5
+      Text = 'edtSingDimTh'
+    end
+    object edtSingDimV: TEdit
+      AnchorSideLeft.Control = edtSingDimW
+      AnchorSideTop.Control = chbVolCalculation
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = edtSingDimW
+      AnchorSideRight.Side = asrBottom
+      Left = 328
+      Height = 28
+      Top = 224
+      Width = 63
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 20
+      BorderSpacing.Bottom = 20
+      TabOrder = 8
+      Text = 'edtSingDimV'
+    end
+    object lblSingDimWUnit: TLabel
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = gbSingleness
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW
+      AnchorSideBottom.Side = asrCenter
+      Left = 396
+      Height = 20
+      Top = 14
+      Width = 22
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Caption = 'мм'
+    end
+    object lblSingDimHUnit: TLabel
+      AnchorSideTop.Control = edtSingDimH
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimWUnit
+      AnchorSideRight.Side = asrBottom
+      Left = 396
+      Height = 20
+      Top = 62
+      Width = 22
+      Anchors = [akTop, akRight]
+      Caption = 'мм'
+    end
+    object lblSingDimThUnit: TLabel
+      AnchorSideTop.Control = edtSingDimTh
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimWUnit
+      AnchorSideRight.Side = asrBottom
+      Left = 396
+      Height = 20
+      Top = 110
+      Width = 22
+      Anchors = [akTop, akRight]
+      Caption = 'мм'
+    end
+    object lblSingDimVUnit: TLabel
+      AnchorSideTop.Control = edtSingDimV
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimWUnit
+      AnchorSideRight.Side = asrBottom
+      Left = 399
+      Height = 20
+      Top = 228
+      Width = 19
+      Anchors = [akTop, akRight]
+      Caption = 'мл'
+    end
+    object trbSingDimW: TTrackBar
+      AnchorSideLeft.Control = trbSingDimTh
+      AnchorSideTop.Control = edtSingDimW
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = trbSingDimTh
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = edtSingDimW
+      AnchorSideBottom.Side = asrBottom
+      Left = 10
+      Height = 28
+      Top = 10
+      Width = 242
+      Position = 0
+      OnChange = trbSingDimWChange
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 0
+    end
+    object trbSingDimH: TTrackBar
+      AnchorSideLeft.Control = trbSingDimTh
+      AnchorSideTop.Control = edtSingDimH
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = trbSingDimTh
+      AnchorSideRight.Side = asrBottom
+      Left = 10
+      Height = 31
+      Top = 57
+      Width = 242
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 2
+    end
+    object trbSingDimTh: TTrackBar
+      AnchorSideLeft.Control = gbSingleness
+      AnchorSideTop.Control = edtSingDimTh
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblSingDimTh
+      Left = 10
+      Height = 31
+      Top = 105
+      Width = 242
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Right = 10
+      TabOrder = 4
+    end
+    object chbVolCalculation: TCheckBox
+      AnchorSideLeft.Control = gbSingleness
+      AnchorSideTop.Control = bvlSingleness
+      AnchorSideTop.Side = asrBottom
+      Left = 10
+      Height = 24
+      Top = 180
+      Width = 264
+      BorderSpacing.Around = 10
+      Caption = 'Автоподсчет объема образования'
+      TabOrder = 6
+      OnChange = chbVolCalculationChange
+    end
+    object bvlSingleness: TBevel
+      AnchorSideLeft.Control = gbSingleness
+      AnchorSideTop.Control = edtSingDimTh
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = gbSingleness
+      AnchorSideRight.Side = asrBottom
+      Left = 10
+      Height = 16
+      Top = 154
+      Width = 408
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Right = 10
+    end
+    object trbSingDimV: TTrackBar
+      AnchorSideLeft.Control = trbSingDimTh
+      AnchorSideTop.Control = edtSingDimV
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = trbSingDimTh
+      AnchorSideRight.Side = asrBottom
+      Left = 10
+      Height = 31
+      Top = 223
+      Width = 242
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 7
+    end
+  end
+  object gbMultiplicity: TGroupBox
+    Tag = 6
+    AnchorSideLeft.Control = sbtnMultiplicity
+    AnchorSideTop.Control = sbtnMultiplicity
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = sbtnMultiplicity
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = gbSingleness
+    AnchorSideBottom.Side = asrBottom
+    Left = 491
+    Height = 349
+    Top = 48
+    Width = 432
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Caption = 'gbMultiplicity'
+    ClientHeight = 324
+    ClientWidth = 428
+    TabOrder = 1
+    object trbMultDimMin: TTrackBar
+      AnchorSideLeft.Control = trbMultDimMax
+      AnchorSideTop.Control = edtMultDimMin
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = trbMultDimMax
+      AnchorSideRight.Side = asrBottom
+      Left = 10
+      Height = 31
+      Top = 9
+      Width = 207
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      TabOrder = 0
+    end
+    object trbMultDimMax: TTrackBar
+      AnchorSideLeft.Control = gbMultiplicity
+      AnchorSideTop.Control = edtMultDimMax
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblMultDimMax
+      Left = 10
+      Height = 31
+      Top = 57
+      Width = 207
+      Position = 0
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Right = 10
+      TabOrder = 2
+    end
+    object lblMultDimMin: TLabel
+      AnchorSideTop.Control = edtMultDimMin
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = edtMultDimMin
+      Left = 231
+      Height = 20
+      Top = 14
+      Width = 84
+      Anchors = [akTop, akRight]
+      Caption = 'мин.размер'
+    end
+    object lblMultDimMax: TLabel
+      AnchorSideTop.Control = edtMultDimMax
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblMultDimMin
+      AnchorSideRight.Side = asrBottom
+      Left = 227
+      Height = 20
+      Top = 62
+      Width = 88
+      Anchors = [akTop, akRight]
+      Caption = 'макс.размер'
+    end
+    object lblMultDimMinUnit: TLabel
+      AnchorSideTop.Control = edtMultDimMin
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = gbMultiplicity
+      AnchorSideRight.Side = asrBottom
+      Left = 396
+      Height = 20
+      Top = 14
+      Width = 22
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 10
+      Caption = 'мм'
+    end
+    object lblMultDimMaxUnit: TLabel
+      AnchorSideLeft.Control = lblMultDimMinUnit
+      AnchorSideTop.Control = edtMultDimMax
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = lblMultDimMinUnit
+      AnchorSideRight.Side = asrBottom
+      Left = 396
+      Height = 20
+      Top = 62
+      Width = 22
+      Anchors = [akTop, akLeft, akRight]
+      Caption = 'мм'
+    end
+    object edtMultDimMin: TEdit
+      AnchorSideTop.Control = gbMultiplicity
+      AnchorSideRight.Control = lblMultDimMinUnit
+      Left = 320
+      Height = 28
+      Top = 10
+      Width = 71
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 5
+      BorderSpacing.Bottom = 20
+      TabOrder = 1
+      Text = 'edtMultDimMin'
+    end
+    object edtMultDimMax: TEdit
+      AnchorSideLeft.Control = edtMultDimMin
+      AnchorSideTop.Control = edtMultDimMin
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = edtMultDimMin
+      AnchorSideRight.Side = asrBottom
+      Left = 320
+      Height = 28
+      Top = 58
+      Width = 71
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 20
+      TabOrder = 3
+      Text = 'edtMultDimMax'
+    end
+  end
+  object sbtnSingleness: TSpeedButton
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = bvlChoice
+    Left = 10
+    Height = 28
+    Top = 10
+    Width = 432
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 10
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 5
+    BorderSpacing.Bottom = 10
+    Caption = 'Единичное образование'
+    Down = True
+    GroupIndex = 1
+  end
+  object sbtnMultiplicity: TSpeedButton
+    AnchorSideLeft.Control = bvlChoice
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 491
+    Height = 28
+    Top = 10
+    Width = 432
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 10
+    BorderSpacing.Bottom = 10
+    Caption = 'Множественные образования'
+    GroupIndex = 1
+  end
+  object pnlButtons: TPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 63
+    Top = 417
+    Width = 933
+    Anchors = [akLeft, akRight, akBottom]
+    Caption = 'pnlButtons'
+    ClientHeight = 63
+    ClientWidth = 933
+    Color = clMoneyGreen
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 2
+    object btnRight: TButton
+      AnchorSideRight.Control = pnlButtons
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = pnlButtons
+      AnchorSideBottom.Side = asrBottom
+      Left = 828
+      Height = 31
+      Top = 21
+      Width = 94
+      Anchors = [akRight, akBottom]
+      BorderSpacing.Around = 10
+      Caption = 'btnRight'
+      TabOrder = 1
+    end
+    object btnLeft: TButton
+      AnchorSideRight.Control = btnRight
+      AnchorSideBottom.Control = pnlButtons
+      AnchorSideBottom.Side = asrBottom
+      Left = 724
+      Height = 31
+      Top = 21
+      Width = 94
+      Anchors = [akRight, akBottom]
+      BorderSpacing.Around = 10
+      Caption = 'btnLeft'
+      TabOrder = 0
+    end
+    object btnHelp: TButton
+      AnchorSideLeft.Control = pnlButtons
+      AnchorSideBottom.Control = pnlButtons
+      AnchorSideBottom.Side = asrBottom
+      Left = 11
+      Height = 31
+      Top = 21
+      Width = 94
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Around = 10
+      Caption = 'btnHelp'
+      TabOrder = 2
+    end
+  end
+  object actList: TActionList
+    Left = 568
+    Top = 176
+    object actSwitchBox: TAction
+      Category = 'auxiliary'
+      Caption = 'actSwitchBox'
+      OnExecute = actSwitchBoxExecute
+    end
+    object actCalcVolume: TAction
+      Category = 'auxiliary'
+      Caption = 'actCalcVolume'
+      OnExecute = actCalcVolumeExecute
+    end
+    object actChoice: TAction
+      Category = 'executable'
+      Caption = 'actChoice'
+      OnExecute = actChoiceExecute
+    end
+    object actExit: TAction
+      Category = 'executable'
+      Caption = 'actExit'
+      OnExecute = actExitExecute
+    end
+    object actHelp: TAction
+      Category = 'executable'
+      Caption = 'actHelp'
+      OnExecute = actHelpExecute
+    end
+    object actResultSingleness: TAction
+      Category = 'auxiliary'
+      Caption = 'actResultSingleness'
+      OnExecute = actResultSinglenessExecute
+    end
+    object actResultMultiplicity: TAction
+      Category = 'auxiliary'
+      Caption = 'actResultMultiplicity'
+      OnExecute = actResultMultiplicityExecute
+    end
+  end
+end

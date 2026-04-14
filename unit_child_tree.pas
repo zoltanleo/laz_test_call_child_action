@@ -16,6 +16,7 @@ uses
   , LazUTF8
   , laz.VirtualTrees
   , unit_virtstringtree
+  , unit_dimension_simple
   ;
 
 type
@@ -56,11 +57,13 @@ type
     procedure TreeAfterCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
       Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
     procedure CollectCheckedNodes(aNode: PVirtualNode);
+    procedure CallDimensionSimple(aNode: PVirtualNode);
   public
     property OutputText: String read FOutputText write FOutputText;
     property InputTreeArray: TRecArr read FInputTreeArray write SetInputTreeArray;
     property TestNodeArr: TRecArr read FTestNodeArr;
     property OnTestNodeArrReady: TTestNodeArrReadyFunc read FOnTestNodeArrReady write FOnTestNodeArrReady;
+    procedure DimensionSimpleClosedHandler(Sender: TObject);
   end;
 
 var
@@ -297,6 +300,11 @@ begin
       begin
         Data^.ValueCheckState:= csCheckedNormal;
         Sender.ReinitNode(Node,True);
+      end;
+    ctCheckBox:
+      begin
+        if (Data^.ValueDimensionType <> ndtNone) and not Data^.ValueCheckedAccept then
+          CallDimensionSimple(Node);
       end
   else ;
   end;
@@ -323,7 +331,13 @@ var
 begin
   Data := Sender.GetNodeData(Node);
   if Assigned(Data) then
+  begin
     CellText := Data^.ValueCaption;
+
+    if (Data^.ValueDimensionType <> ndtNone) then
+      if (UTF8Trim(Data^.ValueProtocol) <> '') then
+        CellText:= Format('%s: %s',[Data^.ValueCaption,Data^.ValueProtocol]);
+  end;
 end;
 
 procedure TfrmChildTree.TreeInitNode(Sender: TBaseVirtualTree; ParentNode,
@@ -334,11 +348,8 @@ begin
   Data := Sender.GetNodeData(Node);
   if Assigned(Data) then
   begin
-    // Устанавливаем тип (чекбокс, радиокнопка или ничего)
-    Node^.CheckType:= Data^.ValueCheckType;
-
-    // Устанавливаем текущее состояние (отмечен/не отмечен)
-    Sender.CheckState[Node] := Data^.ValueCheckState;
+    Node^.CheckType:= Data^.ValueCheckType;// Устанавливаем тип (чекбокс, радиокнопка или ничего)
+    Node^.CheckState := Data^.ValueCheckState;// Устанавливаем текущее состояние (отмечен/не отмечен)
   end;
 
 end;
@@ -365,6 +376,14 @@ begin
   if not Assigned(Data) then Exit;
 
   if Data^.ValueIsDefault then TargetCanvas.Font.Style:= [fsItalic];
+
+{ #todo : времянка !!! удалить !!!! }
+  case Data^.ValueDimensionType of
+    ndtSingle: TargetCanvas.Font.Color:= clRed;
+    ndtDouble: TargetCanvas.Font.Color:= clLime;
+    ndtTriple: TargetCanvas.Font.Color:= clFuchsia;
+  else ;
+  end;
 end;
 
 procedure TfrmChildTree.TreeAfterCellPaint(Sender: TBaseVirtualTree;
@@ -443,6 +462,53 @@ begin
       end;
       aNode := aNode^.NextSibling;
     end;
+end;
+
+procedure TfrmChildTree.CallDimensionSimple(aNode: PVirtualNode);
+var
+  tmpFrm: TfrmDimensionSimple = nil;
+  Data: PMyRecord = nil;
+begin
+  tmpFrm:= TfrmDimensionSimple.Create(Self);
+  Data:= vstChildTree.GetNodeData(aNode);
+  if Assigned(Data) then tmpFrm.Caption:= Data^.ValueCaption;
+  tmpFrm.Tag := PtrInt(aNode);//ссылка на вызвавший Node
+
+  tmpFrm.Show;
+  tmpFrm.OnClosed:= @DimensionSimpleClosedHandler;
+
+  if tmpFrm.canSetFocus then tmpFrm.SetFocus;
+end;
+
+procedure TfrmChildTree.DimensionSimpleClosedHandler(Sender: TObject);
+var
+  frm: TfrmDimensionSimple = nil;
+  Node: PVirtualNode = nil;
+  Data: PMyRecord = nil;
+begin
+  // Убеждаемся, что Sender — это именно наша форма
+  if not (Sender is TfrmDimensionSimple) then Exit;
+
+  frm := TfrmDimensionSimple(Sender);
+
+  // ВОССТАНАВЛИВАЕМ указатель на узел из Tag
+  Node:= PVirtualNode(frm.Tag);
+
+  if Assigned(Node) then
+  begin
+    Data:= vstChildTree.GetNodeData(Node);
+    if Assigned(Data) then
+    begin
+      // Изменяем требуемые поля
+      Data^.ValueCheckState := csCheckedNormal;
+      Data^.ValueProtocol := frm.ReadyText;
+
+      // Переинициализируем узел в дереве.
+      // Это вызовет событие TreeInitNode, где галочка (CheckState)
+      // визуально обновится в соответствии с нашими новыми данными.
+      vstChildTree.ReinitNode(Node, True);
+    end;
+  end;
 end;
 
 end.

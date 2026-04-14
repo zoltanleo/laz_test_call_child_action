@@ -99,7 +99,7 @@ begin
     AppendRecord([AutoID,26,25,'четкие','','', PtrInt(ctRadioButton), PtrInt(csCheckedNormal), True, True]);
     AppendRecord([AutoID,27,25,'нечеткие','','', PtrInt(ctRadioButton), PtrInt(csUncheckedNormal)]);
 
-    AppendRecord([AutoID,28,-1,'размеры','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,28,-1,'размеры','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal), False, False, PtrInt(ndtTriple)]);
   end;
 end;
 
@@ -125,7 +125,7 @@ begin
     AppendRecord([AutoID,12,8,'не прослеживается в области нижней трети','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
     AppendRecord([AutoID,13,8,'не прослеживается на всем протяжении','','', PtrInt(ctRadioButton), PtrInt(csUnCheckedNormal)]);
 
-    AppendRecord([AutoID,14,-1,'толщина (мм)','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal)]);
+    AppendRecord([AutoID,14,-1,'толщина (мм)','','', PtrInt(ctCheckBox), PtrInt(csUncheckedNormal), False, False, PtrInt(ndtSingle)]);
 
   end;
 end;

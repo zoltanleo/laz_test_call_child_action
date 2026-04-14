@@ -35,12 +35,14 @@ const
 
 type
 
+  TNodeDimensionType = (ndtNone, ndtSingle, ndtDouble, ndtTriple);
+
   PMyRecord = ^TMyRecord;
   TMyRecord = record
     ID: SizeInt;          //  tree node ID
     ParentID: SizeInt;    // contains the root node ID for the child node (-1 for the root node)
     ActionName: String;   // link-name of an Action in a custom ActList
-    ValueCaption: String;      // node header
+    ValueCaption: String; // node header
     ValueProtocol: String;//значение для протокола
     ValueHint: String;    //справочное пояснение к записи
     ValueCheckType: TCheckType;  // ctCheckBox/ctRadioButton/ctTriStateCheckBox
@@ -49,6 +51,7 @@ type
     ValueSiblingIsDepend: Boolean; // дизейблить ли узлы этого же уровня при отметке checkbox
     ValueCheckedAccept: Boolean; // позволять ли "чекать"/помечать узел в рантайме
     ValueIsDefault: Boolean;//является ли значение умолчательным (для ctRadioButton)
+    ValueDimensionType: TNodeDimensionType;//узел для обозначения размера (нет/одинарный/двойной/тройной)
   end;
 
   TRecArr = array of TMyRecord;
@@ -95,12 +98,14 @@ type
                             const aActionName, aCaption, aProtocol, aHint: String;
                             aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
                             aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
-                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False);overload;
+                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False;
+                            aDimensionType: TNodeDimensionType = ndtNone);overload;
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
                             const aActionName, aCaption: String;
                             aCheckType: TCheckType = ctNone; aCheckState: TCheckState = csUncheckedNormal;
                             aChildIsDepend: Boolean = False; aSiblingIsDepend: Boolean = False;
-                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False); overload;
+                            aCheckedAccept: Boolean = True; aIsDefault: Boolean = False;
+                            aDimensionType: TNodeDimensionType = ndtNone); overload;
     procedure AddPseudoNode(var aRecArr: TRecArr; const aID, aParentID: SizeInt;
                             const aActionName, aCaption, aProtocol, aHint: String);overload;
     procedure ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
@@ -148,6 +153,7 @@ begin
     FieldDefs.Add('VALUE_CHECK_STATE',ftInteger);
     FieldDefs.Add('VALUE_CHECKED_ACCEPT',ftBoolean);
     FieldDefs.Add('VALUE_IS_DEFAULT',ftBoolean);
+    FieldDefs.Add('VALUE_DIMENSION_TYPE',ftInteger);
 
     Active:= False;
     CreateTable;
@@ -214,7 +220,8 @@ end;
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String;
   aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
-  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean);
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean;
+  aDimensionType: TNodeDimensionType);
 var
   tmpArr: TMyRecord;
 begin
@@ -232,6 +239,7 @@ begin
     ValueSiblingIsDepend:= aSiblingIsDepend;
     ValueCheckedAccept:= aCheckedAccept;
     ValueIsDefault:= aIsDefault;
+    ValueDimensionType:= aDimensionType;
   end;
   SetLength(aRecArr, Length(aRecArr) + 1);
   aRecArr[High(aRecArr)] := tmpArr;
@@ -240,18 +248,25 @@ end;
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption: String;
   aCheckType: TCheckType; aCheckState: TCheckState; aChildIsDepend: Boolean;
-  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean);
+  aSiblingIsDepend: Boolean; aCheckedAccept: Boolean; aIsDefault: Boolean;
+  aDimensionType: TNodeDimensionType);
 begin
   AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
-                '', '', aCheckType, aCheckState, aChildIsDepend,
-                aSiblingIsDepend, aCheckedAccept, aIsDefault);
+                '', '', aCheckType, aCheckState,
+                aChildIsDepend, aSiblingIsDepend, aCheckedAccept, aIsDefault,
+                aDimensionType);
 end;
 
 procedure TPseudoTreeClass.AddPseudoNode(var aRecArr: TRecArr; const aID,
   aParentID: SizeInt; const aActionName, aCaption, aProtocol, aHint: String);
 begin
   AddPseudoNode(aRecArr, aID, aParentID, aActionName, aCaption,
-                aProtocol, aHint, ctNone, csUncheckedNormal, False, False, True, False);
+                aProtocol, aHint, ctNone, csUncheckedNormal,
+                False, //дизейблить ли детей при отметке checkbox
+                False, //дизейблить ли узлы этого же уровня при отметке checkbox
+                True,  //позволять ли "чекать"/помечать узел в рантайме
+                False, //является ли значение умолчательным (для ctRadioButton)
+                ndtNone);
 end;
 
 procedure TPseudoTreeClass.ConvertDataToChildNodeArr(out aNodeArr: TRecArr);
@@ -276,6 +291,7 @@ begin
     aNodeArr[idx].ValueCheckState:= TCheckState(tmpMDS.Fields[7].AsInteger);//VALUE_CHECK_STATE
     aNodeArr[idx].ValueCheckedAccept:= tmpMDS.Fields[8].AsBoolean;//VALUE_CHECKED_ACCEPT
     aNodeArr[idx].ValueIsDefault:= tmpMDS.Fields[9].AsBoolean;//VALUE_IS_DEFAULT
+    aNodeArr[idx].ValueDimensionType:= TNodeDimensionType(tmpMDS.Fields[10].AsInteger);//VALUE_DIMENSION_TYPE
 
     tmpMDS.Next;
   end;

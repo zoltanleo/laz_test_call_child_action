@@ -11,13 +11,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms,
-  unit_main
-  //,
-  //unit_child,
-  //unit_virtstringtree,
-  //unit_detail,
-  //unit_child_tree
-  { you can add units after this };
+  unit_main, unit_dimension_simple;
 
 {$R *.res}
 
