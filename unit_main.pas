@@ -190,7 +190,8 @@ begin
     Node^.CheckType:= Data^.ValueCheckType;
 
     // Устанавливаем текущее состояние (отмечен/не отмечен)
-    Sender.CheckState[Node] := Data^.ValueCheckState;
+    //Sender.CheckState[Node] := Data^.ValueCheckState;
+    Node^.CheckState:= Data^.ValueCheckState;
   end;
 end;
 

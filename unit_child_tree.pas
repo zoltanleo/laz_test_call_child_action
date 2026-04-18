@@ -471,7 +471,13 @@ var
 begin
   tmpFrm:= TfrmDimensionSimple.Create(Self);
   Data:= vstChildTree.GetNodeData(aNode);
-  if Assigned(Data) then tmpFrm.Caption:= Data^.ValueCaption;
+
+  if not Assigned(Data) then Exit;
+  if (Data^.ValueDimensionType = ndtNone) then Exit;
+
+  tmpFrm.Caption:= Data^.ValueCaption;
+  tmpFrm.NodeDimensionType:= Data^.ValueDimensionType;
+
   tmpFrm.Tag := PtrInt(aNode);//ссылка на вызвавший Node
 
   tmpFrm.Show;
