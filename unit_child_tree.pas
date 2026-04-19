@@ -56,6 +56,7 @@ type
       TextType: TVSTTextType);
     procedure TreeAfterCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
       Node: PVirtualNode; Column: TColumnIndex; const CellRect: TRect);
+    procedure TreeFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure CollectCheckedNodes(aNode: PVirtualNode);
     procedure CallDimensionSimple(aNode: PVirtualNode);
   public
@@ -126,6 +127,7 @@ begin
     OnGetNodeDataSize:= @TreeGetNodeDataSize;
     OnPaintText:= @TreePaintText;
     OnAfterCellPaint:= @TreeAfterCellPaint;
+    OnFocusChanged:= @TreeFocusChanged;
   end;
 end;
 
@@ -440,6 +442,50 @@ begin
 
           TargetCanvas.Polygon(Triangle);
     end;
+end;
+
+procedure TfrmChildTree.TreeFocusChanged(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex);
+var
+  Sibling: PVirtualNode = nil;
+  Data: PMyRecord = nil;
+begin
+  if not Assigned(Node) or FIsInitializing then Exit;
+
+  Sender.BeginUpdate;
+  try
+    // 1. Обрабатываем текущий узел (получает фокус и Checked)
+    Node^.CheckState := csCheckedNormal;
+    // Синхронизируем с вашими данными (PMyRecord)
+    Data := Sender.GetNodeData(Node);
+    if Assigned(Data) then
+      Data^.ValueCheckState := csCheckedNormal;
+
+    // 2. Сбрасываем соседей (Siblings) на том же уровне
+    Sibling := Node^.Parent^.FirstChild;
+    while Assigned(Sibling) do
+    begin
+      if (Sibling <> Node) then
+      begin
+        // Устанавливаем состояние Unchecked
+        Sibling^.CheckState := csUncheckedNormal;
+
+        // Снимаем выделение (vsSelected)
+        Sender.Selected[Sibling] := False;
+
+        // Синхронизируем данные соседа
+        Data := Sender.GetNodeData(Sibling);
+        if Assigned(Data) then
+          Data^.ValueCheckState := csUncheckedNormal;
+      end;
+      Sibling := Sibling^.NextSibling;
+    end;
+
+    // Убеждаемся, что текущий узел выделен
+    Sender.Selected[Node] := True;
+  finally
+    Sender.EndUpdate;
+  end;
 end;
 
 procedure TfrmChildTree.CollectCheckedNodes(aNode: PVirtualNode);
