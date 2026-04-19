@@ -202,7 +202,7 @@ end;
 
 procedure TfrmDimensionSimple.FormDeactivate(Sender: TObject);
 begin
-  btnCloseClick(Sender);
+  //btnCloseClick(Sender);
 end;
 
 procedure TfrmDimensionSimple.FormShow(Sender: TObject);

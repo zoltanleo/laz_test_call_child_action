@@ -98,6 +98,10 @@ begin
     Header.AutoSizeIndex := 0;
     Header.MainColumn := 0;
 
+    // Устанавливаем высоту узла на 4 пикселя больше размера чекбокса.
+    // DEFAULT_CHECK_WIDTH в VTV равен 16.
+    // Функция Scale96ToFont обеспечит корректное отображение на HighDPI-мониторах.
+    DefaultNodeHeight := Scale96ToFont(20); // 16 (размер чекбокса) + 4 (отступ)
 
     with TreeOptions do begin
       AutoOptions := AutoOptions + [toAutoScroll, toAutoSpanColumns, toAutoTristateTracking];
@@ -480,8 +484,13 @@ begin
 
   tmpFrm.Tag := PtrInt(aNode);//ссылка на вызвавший Node
 
-  tmpFrm.Show;
-  tmpFrm.OnClosed:= @DimensionSimpleClosedHandler;
+  tmpFrm.ShowModal;
+
+  if (tmpFrm.ModalResult = mrOK) then
+  begin
+  { #todo : !!! переделать логику, потому что в маке немодальное окно прячется под другими !!! }
+  //tmpFrm.OnClosed:= @DimensionSimpleClosedHandler;
+  end;
 
   if tmpFrm.canSetFocus then tmpFrm.SetFocus;
 end;

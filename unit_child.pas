@@ -12,6 +12,7 @@ uses
   , unit_child_tree
   , Controls
   , laz.VirtualTrees
+  , Dialogs
   ;
 
 type
@@ -214,11 +215,13 @@ begin
   try
     tmpFrm.InputTreeArray:= ChildNodeArr;
     tmpFrm.OnTestNodeArrReady := @GetTestString; // передаём callback для обработки TestNodeArr
+    LastActionResultOK:= False;
+
     tmpFrm.ShowModal;
 
     if (tmpFrm.ModalResult = mrOK) then
     begin
-
+      LastActionResultOK := True; // Устанавливаем флаг успеха
     end;
 
     if Assigned(FOnDisplayMessage) then FOnDisplayMessage(tmpFrm.OutputText);

@@ -15,24 +15,6 @@ uses
   , MemDs
   ;
 
-const
-  CheckStateArr: array[TCheckState] of string = (
-    'csUncheckedNormal',   // csUncheckedNormal: unchecked and not pressed
-    'csUncheckedPressed',  // csUncheckedPressed: unchecked and pressed
-    'csCheckedNormal',     // csCheckedNormal: checked and not pressed
-    'csCheckedPressed',    // csCheckedPressed: checked and pressed
-    'csMixedNormal',       // csMixedNormal: 3-state, not pressed
-    'csMixedPressed'       // csMixedPressed: 3-state, pressed
-  );
-
-  CheckTypeArr: array[TCheckType] of string = (
-      'ctNone',
-      'ctTriStateCheckBox',
-      'ctCheckBox',
-      'ctRadioButton',
-      'ctButton'
-    );
-
 type
 
   TNodeDimensionType = (ndtNone, ndtSingle, ndtDouble, ndtTriple);
@@ -66,6 +48,7 @@ type
   { TPseudoTreeClass - базовый класс для работы с псевдодеревом }
   TPseudoTreeClass = class
   private
+    FLastActionResultOK: Boolean;
 
   protected
     FAutoID: SizeInt;
@@ -87,6 +70,8 @@ type
 
     property tmpMDS: TMemDataset read FtmpMDS write FtmpMDS;
     property AutoID: SizeInt read FAutoID;//псевдоинкремент для mds
+    property LastActionResultOK: Boolean read FLastActionResultOK write FLastActionResultOK;//закрылось ли вызванное окно по mrOk
+
     procedure GetPseudoTreeData; virtual; abstract; // абстрактный метод для переопределения
     procedure InstanceInit;virtual; abstract;//процедура инициализации наследника
 

@@ -32,7 +32,7 @@ type
   private
     FTreeEntryCounter: SizeInt;//счетчик вхождения в дерево
     FPseudoClass: TPseudoTreeClass;
-    procedure ExecuteActionForNode(Node: PVirtualNode);
+    procedure ExecuteActionForNode(aNode: PVirtualNode);
     procedure TreeAddToSelection(Sender: TBaseVirtualTree;Node: PVirtualNode);
     procedure TreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
@@ -135,7 +135,6 @@ begin
   Node := vst.GetFirst;
   FTreeEntryCounter:= 0;
 
-
   if Assigned(Node) then
   begin
     vst.Selected[Node] := True;
@@ -144,21 +143,34 @@ begin
   if vst.CanSetFocus then vst.SetFocus;
 end;
 
-procedure TfrmMain.ExecuteActionForNode(Node: PVirtualNode);
+procedure TfrmMain.ExecuteActionForNode(aNode: PVirtualNode);
 var
   Data: PMyRecord = nil;
   Act: TAction = nil;
 begin
-  if not Assigned(Node) then Exit;
+  if not Assigned(aNode) then Exit;
+  if (vsDisabled in aNode^.States) then Exit;//дизейбленные узлы не должны работать
+
   if (FTreeEntryCounter = 0) then Exit;
 
-  Data := vst.GetNodeData(Node);
+  Data := vst.GetNodeData(aNode);
 
   // Ищем действие по имени из записи узла в массиве действий текущего класса
   Act := PseudoClass.GetActionByName(Data^.ActionName);
-  if Assigned(Act) and Assigned(Act.OnExecute)
-    then Act.Execute
-    else lblExecName.Caption := 'обработчик не назначен';
+  if Assigned(Act) and Assigned(Act.OnExecute) then
+  begin
+    Act.Execute;
+    // Проверяем, завершилось ли действие успешно (mrOK)
+    if PseudoClass.LastActionResultOK then
+    begin
+      // 1. Обновляем данные в самой записи (Record)
+      Data^.ValueCheckState := csCheckedNormal;
+
+      // 2. Визуально обновляем состояние чекбокса в дереве
+      vst.ReinitNode(aNode,True);
+    end;
+  end else
+    lblExecName.Caption := 'обработчик не назначен';
 end;
 
 procedure TfrmMain.TreeAddToSelection(Sender: TBaseVirtualTree;
