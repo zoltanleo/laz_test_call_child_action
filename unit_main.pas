@@ -68,7 +68,10 @@ begin
   begin
     Header.AutoSizeIndex := 0;
     Header.MainColumn := 0;
-
+    // Устанавливаем высоту узла на 4 пикселя больше размера чекбокса.
+    // DEFAULT_CHECK_WIDTH в VTV равен 16.
+    // Функция Scale96ToFont обеспечит корректное отображение на HighDPI-мониторах.
+    DefaultNodeHeight := Scale96ToFont(20); // 16 (размер чекбокса) + 4 (отступ)
 
     with TreeOptions do begin
       AutoOptions := AutoOptions + [toAutoScroll, toAutoSpanColumns, toAutoTristateTracking];
