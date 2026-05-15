@@ -98,11 +98,13 @@ begin
   begin
     Header.AutoSizeIndex := 0;
     Header.MainColumn := 0;
+    HintMode := hmTooltip;
+    ShowHint := True;
 
     // Устанавливаем высоту узла на 4 пикселя больше размера чекбокса.
     // DEFAULT_CHECK_WIDTH в VTV равен 16.
     // Функция Scale96ToFont обеспечит корректное отображение на HighDPI-мониторах.
-    DefaultNodeHeight := Scale96ToFont(20); // 16 (размер чекбокса) + 4 (отступ)
+    DefaultNodeHeight := Scale96ToFont(DEFAULT_CHECK_WIDTH + 4); // 16 (размер чекбокса) + 4 (отступ)
 
     with TreeOptions do begin
       AutoOptions := AutoOptions + [toAutoScroll, toAutoSpanColumns, toAutoTristateTracking];
@@ -444,13 +446,15 @@ begin
     end;
 end;
 
-procedure TfrmChildTree.TreeFocusChanged(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
+procedure TfrmChildTree.TreeFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 var
   Sibling: PVirtualNode = nil;
   Data: PMyRecord = nil;
 begin
   if not Assigned(Node) or FIsInitializing then Exit;
+
+  //это условие только для радиобутонов
+  if (Node^.CheckType <> ctRadioButton) then Exit;
 
   Sender.BeginUpdate;
   try
@@ -476,7 +480,7 @@ begin
         // Синхронизируем данные соседа
         Data := Sender.GetNodeData(Sibling);
         if Assigned(Data) then
-          Data^.ValueCheckState := csUncheckedNormal;
+          //Data^.ValueCheckState := csUncheckedNormal;
       end;
       Sibling := Sibling^.NextSibling;
     end;
@@ -507,6 +511,7 @@ begin
                 SetLength(FTestNodeArr, Length(FTestNodeArr) + 1);
                 FTestNodeArr[High(FTestNodeArr)] := Data^;
               end;
+            else ;
           end;
         end;
       end;
@@ -520,25 +525,33 @@ var
   Data: PMyRecord = nil;
 begin
   tmpFrm:= TfrmDimensionSimple.Create(Self);
-  Data:= vstChildTree.GetNodeData(aNode);
+  try
+    Data:= vstChildTree.GetNodeData(aNode);
 
-  if not Assigned(Data) then Exit;
-  if (Data^.ValueDimensionType = ndtNone) then Exit;
+    if not Assigned(Data) then Exit;
+    if (Data^.ValueDimensionType = ndtNone) then Exit;
 
-  tmpFrm.Caption:= Data^.ValueCaption;
-  tmpFrm.NodeDimensionType:= Data^.ValueDimensionType;
+    tmpFrm.Caption:= Data^.ValueCaption;
+    tmpFrm.NodeDimensionType:= Data^.ValueDimensionType;
 
-  tmpFrm.Tag := PtrInt(aNode);//ссылка на вызвавший Node
+    //tmpFrm.Tag := PtrInt(aNode);//ссылка на вызвавший Node
 
-  tmpFrm.ShowModal;
+    tmpFrm.ShowModal;
 
-  if (tmpFrm.ModalResult = mrOK) then
-  begin
-  { #todo : !!! переделать логику, потому что в маке немодальное окно прячется под другими !!! }
-  //tmpFrm.OnClosed:= @DimensionSimpleClosedHandler;
+    if (tmpFrm.ModalResult = mrOK) then
+    begin
+    { #todo : !!! переделать логику, потому что в маке немодальное окно прячется под другими !!! }
+    //tmpFrm.OnClosed:= @DimensionSimpleClosedHandler;
+      Data^.ValueProtocol:= tmpFrm.GenText.ToString;
+      Data^.ValueCheckState := csCheckedNormal;
+
+      vstChildTree.ReinitNode(aNode,True);
+    end;
+
+    //if tmpFrm.canSetFocus then tmpFrm.SetFocus;
+  finally
+    FreeAndNil(tmpFrm);
   end;
-
-  if tmpFrm.canSetFocus then tmpFrm.SetFocus;
 end;
 
 procedure TfrmChildTree.DimensionSimpleClosedHandler(Sender: TObject);
@@ -562,7 +575,7 @@ begin
     begin
       // Изменяем требуемые поля
       Data^.ValueCheckState := csCheckedNormal;
-      Data^.ValueProtocol := frm.ReadyText;
+      //Data^.ValueProtocol := frm.ReadyText;
 
       // Переинициализируем узел в дереве.
       // Это вызовет событие TreeInitNode, где галочка (CheckState)

@@ -5,46 +5,61 @@ unit unit_dimension_simple;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  StdCtrls, unit_virtstringtree;
+  Classes
+  , SysUtils
+  , Forms
+  , Controls
+  , Graphics
+  , Dialogs
+  , ExtCtrls
+  , ComCtrls
+  , StdCtrls, ActnList, LazUTF8
+  , unit_virtstringtree
+  ;
 
 type
 
   { TfrmDimensionSimple }
 
   TfrmDimensionSimple = class(TForm)
-    btnClose: TButton;
-    edtSingDimH: TEdit;
-    edtSingDimTh: TEdit;
-    edtSingDimW: TEdit;
+    actCancel: TAction;
+    actOK: TAction;
+    actList: TActionList;
+    btnRight: TButton;
+    btnLeft: TButton;
+    edtDimH: TEdit;
+    edtDimTh: TEdit;
+    edtDimW: TEdit;
     lblDescription: TLabel;
-    lblSingDimWUnit: TLabel;
-    lblSingDimWUnit1: TLabel;
-    lblSingDimWUnit2: TLabel;
-    Panel1: TPanel;
+    lblDimW: TLabel;
+    lblDimH: TLabel;
+    lblDimTh: TLabel;
+    pnlCommon: TPanel;
     pnlBottom: TPanel;
     pnlMiddle: TPanel;
     pnlTop: TPanel;
-    ScrollBox1: TScrollBox;
-    trbSingDimH: TTrackBar;
-    trbSingDimTh: TTrackBar;
-    trbSingDimW: TTrackBar;
-    procedure btnCloseClick(Sender: TObject);
-    procedure edtSingDimWEditingDone(Sender: TObject);
-    procedure edtSingDimWKeyPress(Sender: TObject; var Key: char);
+    scbDimension: TScrollBox;
+    trbDimH: TTrackBar;
+    trbDimTh: TTrackBar;
+    trbDimW: TTrackBar;
+    procedure actCancelExecute(Sender: TObject);
+    procedure actOKExecute(Sender: TObject);
+    procedure edtDimWEditingDone(Sender: TObject);
+    procedure edtDimWKeyPress(Sender: TObject; var Key: char);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure trbSingDimWChange(Sender: TObject);
+    procedure trbDimWChange(Sender: TObject);
   private
+    FGenText: TStringBuilder;
     FNodeDimensionType: TNodeDimensionType;
     FOnClosed: TNotifyEvent;
-    FReadyText: String;
   public
     property OnClosed: TNotifyEvent read FOnClosed write FOnClosed;
-    property ReadyText: String read FReadyText;
     property NodeDimensionType: TNodeDimensionType read FNodeDimensionType write FNodeDimensionType;
+    property GenText: TStringBuilder read FGenText;
   end;
 
 var
@@ -57,22 +72,43 @@ implementation
 { TfrmDimensionSimple }
 
 
-procedure TfrmDimensionSimple.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TfrmDimensionSimple.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  FReadyText:= FormatDateTime('hh:nn:ss.zzz',Now);
+  //FReadyText:= FormatDateTime('hh:nn:ss.zzz',Now);
+  //
+  //if Assigned(FOnClosed) then FOnClosed(Self);
+  //CloseAction:= caFree;
 
-  if Assigned(FOnClosed) then FOnClosed(Self);
-  CloseAction:= caFree;
+  GenText.Clear;
+
+  if (StrToInt(edtDimW.Text) <> 0) then GenText.AppendFormat('%s',[edtDimW.Text]);
+
+  if pnlMiddle.Visible then
+    if (StrToInt(edtDimH.Text) <> 0) then
+    begin
+      if (StrToInt(edtDimW.Text) <> 0)
+        then GenText.AppendFormat(' мм x %s',[edtDimH.Text])
+        else GenText.AppendFormat('%s',[edtDimH.Text]);
+    end;
+
+  if pnlBottom.Visible then
+    if (StrToInt(edtDimTh.Text) <> 0) then
+    begin
+      if (StrToInt(edtDimW.Text) <> 0) or (StrToInt(edtDimH.Text) <> 0)
+        then GenText.AppendFormat(' мм x %s',[edtDimTh.Text])
+        else GenText.AppendFormat('%s',[edtDimTh.Text]);
+    end;
+
+  GenText.Append(' мм');
 end;
 
-procedure TfrmDimensionSimple.edtSingDimWKeyPress(Sender: TObject; var Key: char
+procedure TfrmDimensionSimple.edtDimWKeyPress(Sender: TObject; var Key: char
   );
 begin
   if not (Key in ['0'..'9']) then Key:= #0;
 end;
 
-procedure TfrmDimensionSimple.edtSingDimWEditingDone(Sender: TObject);
+procedure TfrmDimensionSimple.edtDimWEditingDone(Sender: TObject);
 var
   Value: LongInt = 0;
   tmpTrBar: TTrackBar = nil;
@@ -120,14 +156,19 @@ begin
 
   tmpTrBar.OnChange:= nil;
   tmpTrBar.Position:= Value;
-  tmpTrBar.OnChange:= @trbSingDimWChange;
+  tmpTrBar.OnChange:= @trbDimWChange;
 
   TEdit(Sender).Text:= IntToStr(Value);
 end;
 
-procedure TfrmDimensionSimple.btnCloseClick(Sender: TObject);
+procedure TfrmDimensionSimple.actCancelExecute(Sender: TObject);
 begin
-  Self.Close;
+  Self.ModalResult:= mrCancel;
+end;
+
+procedure TfrmDimensionSimple.actOKExecute(Sender: TObject);
+begin
+  Self.ModalResult:= mrOK;
 end;
 
 procedure TfrmDimensionSimple.FormCreate(Sender: TObject);
@@ -145,6 +186,7 @@ var
       TPanel(aCtrl).Caption:= '';
       TPanel(aCtrl).Color:= clDefault;
       TPanel(aCtrl).BevelOuter:= bvNone;
+      TPanel(aCtrl).AutoSize:= True;
     end;
 
     if aCtrl.InheritsFrom(TEdit) then
@@ -152,8 +194,8 @@ var
       TEdit(aCtrl).MaxLength:= 3;
       TEdit(aCtrl).Text:= '0';
       TEdit(aCtrl).Width:= ChrWdt * 3;
-      TEdit(aCtrl).OnKeyPress:= @edtSingDimWKeyPress;
-      TEdit(aCtrl).OnEditingDone:= @edtSingDimWEditingDone;
+      TEdit(aCtrl).OnKeyPress:= @edtDimWKeyPress;
+      TEdit(aCtrl).OnEditingDone:= @edtDimWEditingDone;
     end;
 
     if aCtrl.InheritsFrom(TTrackBar) then
@@ -166,7 +208,16 @@ var
       TTrackBar(aCtrl).Height:= lblDescription.Height * 3 div 2;
 
       TTrackBar(aCtrl).Position:= 0;
-      TTrackBar(aCtrl).OnChange:= @trbSingDimWChange;
+      TTrackBar(aCtrl).OnChange:= @trbDimWChange;
+    end;
+
+    if aCtrl.InheritsFrom(TScrollBox) then
+    begin
+      TScrollBox(aCtrl).BorderStyle:= bsNone;
+      TScrollBox(aCtrl).HorzScrollBar.Smooth:= True;
+      TScrollBox(aCtrl).HorzScrollBar.Tracking:= True;
+      TScrollBox(aCtrl).VertScrollBar.Smooth:= True;
+      TScrollBox(aCtrl).VertScrollBar.Tracking:= True;
     end;
 
     //является винконтролом и контейнером
@@ -181,22 +232,26 @@ begin
   Self.ShowHint:= True;
   Self.AutoScroll:= True;
   Self.AutoSize:= True;
+  Self.ModalResult:= mrNone;
+  FGenText:= TStringBuilder.Create;
 
   ChrWdt:= Canvas.TextWidth('W');//ширина большого символа
   FNodeDimensionType:= ndtNone;
 
-  trbSingDimW.Tag:= 1;
-  trbSingDimH.Tag:= 2;
-  trbSingDimTh.Tag:= 3;
+  trbDimW.Tag:= 1;
+  trbDimH.Tag:= 2;
+  trbDimTh.Tag:= 3;
 
-  edtSingDimW.Tag:= trbSingDimW.Tag;
-  edtSingDimH.Tag:= trbSingDimH.Tag;
-  edtSingDimTh.Tag:= trbSingDimTh.Tag;
-
+  edtDimW.Tag:= trbDimW.Tag;
+  edtDimH.Tag:= trbDimH.Tag;
+  edtDimTh.Tag:= trbDimTh.Tag;
 
   for i:= 0 to Pred(Self.ControlCount) do RecursiveInitControls(Self.Controls[i]);
 
-  Self.Constraints.MinWidth:= edtSingDimW.Width * 10;
+  Self.Constraints.MinWidth:= edtDimW.Width * 10;
+
+  btnLeft.OnClick:= @actOKExecute;
+  btnRight.OnClick:= @actCancelExecute;
 
 end;
 
@@ -205,13 +260,18 @@ begin
   //btnCloseClick(Sender);
 end;
 
+procedure TfrmDimensionSimple.FormDestroy(Sender: TObject);
+begin
+  FGenText.Free;
+end;
+
 procedure TfrmDimensionSimple.FormShow(Sender: TObject);
 begin
   pnlMiddle.Visible:= (PtrInt(NodeDimensionType) >= PtrInt(ndtDouble));
   pnlBottom.Visible:= (PtrInt(NodeDimensionType) >= PtrInt(ndtTriple));
 end;
 
-procedure TfrmDimensionSimple.trbSingDimWChange(Sender: TObject);
+procedure TfrmDimensionSimple.trbDimWChange(Sender: TObject);
 var
   tmpEdt: TEdit = nil;
 
