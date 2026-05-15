@@ -13,7 +13,9 @@ uses
   , Dialogs
   , ExtCtrls
   , ComCtrls
-  , StdCtrls, ActnList, LazUTF8
+  , StdCtrls
+  , ActnList
+  , LazUTF8
   , unit_virtstringtree
   ;
 
@@ -74,11 +76,6 @@ implementation
 
 procedure TfrmDimensionSimple.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  //FReadyText:= FormatDateTime('hh:nn:ss.zzz',Now);
-  //
-  //if Assigned(FOnClosed) then FOnClosed(Self);
-  //CloseAction:= caFree;
-
   GenText.Clear;
 
   if (StrToInt(edtDimW.Text) <> 0) then GenText.AppendFormat('%s',[edtDimW.Text]);
@@ -105,58 +102,68 @@ end;
 procedure TfrmDimensionSimple.edtDimWKeyPress(Sender: TObject; var Key: char
   );
 begin
-  if not (Key in ['0'..'9']) then Key:= #0;
+  if not (Key in ['0'..'9',#8]) then Key:= #0;
 end;
 
 procedure TfrmDimensionSimple.edtDimWEditingDone(Sender: TObject);
 var
   Value: LongInt = 0;
-  tmpTrBar: TTrackBar = nil;
+  PnlPar: TPanel = nil;
+  Trb: TTrackBar = nil;
+  i: SizeInt = 0;
 
-  function FindTrackBarByTag(aCtrl: TWinControl; aTag: Integer): TTrackBar;
-  var
-    cnt: SizeInt = -1;
-    ChildCtrl: TControl = nil;
-  begin
-    Result:= nil;
-
-    if TWinControl(aCtrl).InheritsFrom(TTrackBar) then
-      if (TTrackBar(aCtrl).Tag = aTag) then
-      begin
-        Result:= TTrackBar(aCtrl);
-        Exit;
-      end;
-
-    if (csAcceptsControls in aCtrl.ControlStyle) then
-      for cnt := 0 to Pred(aCtrl.ControlCount) do
-      begin
-        ChildCtrl:= aCtrl.Controls[cnt];
-
-        if (ChildCtrl is TWinControl) then
-        begin
-          Result := FindTrackBarByTag(TWinControl(ChildCtrl), ATag);
-          if Assigned(Result) then Exit; // Нашли во вложенном контейнере, выходим
-        end;
-      end;
-  end;
+  //tmpTrBar: TTrackBar = nil;
+  //
+  //function FindTrackBarByTag(aCtrl: TWinControl; aTag: Integer): TTrackBar;
+  //var
+  //  cnt: SizeInt = -1;
+  //  ChildCtrl: TControl = nil;
+  //begin
+  //  Result:= nil;
+  //
+  //  if TWinControl(aCtrl).InheritsFrom(TTrackBar) then
+  //    if (TTrackBar(aCtrl).Tag = aTag) then
+  //    begin
+  //      Result:= TTrackBar(aCtrl);
+  //      Exit;
+  //    end;
+  //
+  //  if (csAcceptsControls in aCtrl.ControlStyle) then
+  //    for cnt := 0 to Pred(aCtrl.ControlCount) do
+  //    begin
+  //      ChildCtrl:= aCtrl.Controls[cnt];
+  //
+  //      if (ChildCtrl is TWinControl) then
+  //      begin
+  //        Result := FindTrackBarByTag(TWinControl(ChildCtrl), ATag);
+  //        if Assigned(Result) then Exit; // Нашли во вложенном контейнере, выходим
+  //      end;
+  //    end;
+  //end;
 begin
   if not TObject(Sender).InheritsFrom(TEdit) then Exit;
+  PnlPar:= TPanel(TEdit(Sender).Parent);
+  if not Assigned(PnlPar) then Exit;
 
-  tmpTrBar:= FindTrackBarByTag(Self,TEdit(Sender).Tag);
+  for i := 0 to Pred(PnlPar.ControlCount) do
+    if (PnlPar.Controls[i]).InheritsFrom(TTrackBar) then
+    begin
+      Trb:= TTrackBar(PnlPar.Controls[i]);
+      Break;
+    end;
 
-  if not Assigned(tmpTrBar) then Exit;
-  if not tmpTrBar.Enabled then Exit;//отключенных не обслуживаем
+  if not Assigned(Trb) then Exit;
 
   if not TryStrToInt(TEdit(Sender).Text,Value) then Value:= 0;
 
-  if (Value > tmpTrBar.Max)
-    then Value:= tmpTrBar.Max
-    else if (Value < tmpTrBar.Min)
-          then  Value:= tmpTrBar.Min;
+  if (Value > Trb.Max)
+    then Value:= Trb.Max
+    else
+      if (Value < Trb.Min) then  Value:= Trb.Min;
 
-  tmpTrBar.OnChange:= nil;
-  tmpTrBar.Position:= Value;
-  tmpTrBar.OnChange:= @trbDimWChange;
+  Trb.OnChange:= nil;
+  Trb.Position:= Value;
+  Trb.OnChange:= @trbDimWChange;
 
   TEdit(Sender).Text:= IntToStr(Value);
 end;
@@ -230,7 +237,6 @@ var
   end;
 begin
   Self.ShowHint:= True;
-  Self.AutoScroll:= True;
   Self.AutoSize:= True;
   Self.ModalResult:= mrNone;
   FGenText:= TStringBuilder.Create;
