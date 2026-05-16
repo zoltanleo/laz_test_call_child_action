@@ -171,7 +171,9 @@ var
     begin
       TEdit(aCtrl).MaxLength:= 3;
       TEdit(aCtrl).Text:= '0';
+      {$IFDEF MSWINDOWS}
       TEdit(aCtrl).Width:= ChrWdt;
+      {$ENDIF}
       TEdit(aCtrl).OnKeyPress:= @edtDimWKeyPress;
       TEdit(aCtrl).OnEditingDone:= @edtDimWEditingDone;
     end;
@@ -182,8 +184,6 @@ var
         TTrackBar(aCtrl).Max:= 100;
         TTrackBar(aCtrl).Frequency:= 5;
       end;
-
-      //TTrackBar(aCtrl).Height:= lblDescription.Height * 3 div 2;
 
       TTrackBar(aCtrl).Position:= 0;
       TTrackBar(aCtrl).OnChange:= @trbDimWChange;
