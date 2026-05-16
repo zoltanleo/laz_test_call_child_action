@@ -1,10 +1,10 @@
 object frmDimensionSimple: TfrmDimensionSimple
   Left = 398
-  Height = 536
+  Height = 463
   Top = 34
   Width = 706
   Caption = 'frmDimensionSimple'
-  ClientHeight = 536
+  ClientHeight = 463
   ClientWidth = 706
   DesignTimePPI = 144
   LCLVersion = '4.99.0.0'
@@ -21,13 +21,13 @@ object frmDimensionSimple: TfrmDimensionSimple
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 536
+    Height = 463
     Top = 0
     Width = 706
     HorzScrollBar.Page = 297
     VertScrollBar.Page = 444
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 532
+    ClientHeight = 459
     ClientWidth = 702
     TabOrder = 0
     object pnlCommon: TPanel
@@ -38,12 +38,12 @@ object frmDimensionSimple: TfrmDimensionSimple
       AnchorSideBottom.Control = scbDimension
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 532
+      Height = 459
       Top = 0
       Width = 702
       Anchors = [akTop, akLeft, akRight, akBottom]
       Caption = 'pnlCommon'
-      ClientHeight = 532
+      ClientHeight = 459
       ClientWidth = 702
       TabOrder = 0
       object lblDescription: TLabel
@@ -274,21 +274,6 @@ object frmDimensionSimple: TfrmDimensionSimple
         BorderSpacing.Right = 12
         Caption = 'btnLeft'
         TabOrder = 4
-      end
-      object TrackBar1: TTrackBar
-        AnchorSideLeft.Control = pnlCommon
-        AnchorSideRight.Control = pnlCommon
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = pnlCommon
-        AnchorSideBottom.Side = asrBottom
-        Left = 13
-        Height = 38
-        Top = 481
-        Width = 676
-        Position = 0
-        Anchors = [akLeft, akRight, akBottom]
-        BorderSpacing.Around = 12
-        TabOrder = 5
       end
     end
   end

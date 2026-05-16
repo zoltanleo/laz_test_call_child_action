@@ -41,7 +41,6 @@ type
     pnlMiddle: TPanel;
     pnlTop: TPanel;
     scbDimension: TScrollBox;
-    TrackBar1: TTrackBar;
     trbDimH: TTrackBar;
     trbDimTh: TTrackBar;
     trbDimW: TTrackBar;
@@ -181,13 +180,11 @@ var
 
     if aCtrl.InheritsFrom(TTrackBar) then
     begin
-      begin
-        TTrackBar(aCtrl).Max:= 100;
-        TTrackBar(aCtrl).Frequency:= 5;
-      end;
-
+      TTrackBar(aCtrl).Max:= 100;
+      TTrackBar(aCtrl).Frequency:= 5;
       TTrackBar(aCtrl).Position:= 0;
       TTrackBar(aCtrl).OnChange:= @trbDimWChange;
+      TTrackBar(aCtrl).AutoSize:= True;
     end;
 
     if aCtrl.InheritsFrom(TScrollBox) then
