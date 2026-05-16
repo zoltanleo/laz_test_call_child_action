@@ -111,35 +111,6 @@ var
   PnlPar: TPanel = nil;
   Trb: TTrackBar = nil;
   i: SizeInt = 0;
-
-  //tmpTrBar: TTrackBar = nil;
-  //
-  //function FindTrackBarByTag(aCtrl: TWinControl; aTag: Integer): TTrackBar;
-  //var
-  //  cnt: SizeInt = -1;
-  //  ChildCtrl: TControl = nil;
-  //begin
-  //  Result:= nil;
-  //
-  //  if TWinControl(aCtrl).InheritsFrom(TTrackBar) then
-  //    if (TTrackBar(aCtrl).Tag = aTag) then
-  //    begin
-  //      Result:= TTrackBar(aCtrl);
-  //      Exit;
-  //    end;
-  //
-  //  if (csAcceptsControls in aCtrl.ControlStyle) then
-  //    for cnt := 0 to Pred(aCtrl.ControlCount) do
-  //    begin
-  //      ChildCtrl:= aCtrl.Controls[cnt];
-  //
-  //      if (ChildCtrl is TWinControl) then
-  //      begin
-  //        Result := FindTrackBarByTag(TWinControl(ChildCtrl), ATag);
-  //        if Assigned(Result) then Exit; // Нашли во вложенном контейнере, выходим
-  //      end;
-  //    end;
-  //end;
 begin
   if not TObject(Sender).InheritsFrom(TEdit) then Exit;
   PnlPar:= TPanel(TEdit(Sender).Parent);
@@ -200,7 +171,7 @@ var
     begin
       TEdit(aCtrl).MaxLength:= 3;
       TEdit(aCtrl).Text:= '0';
-      TEdit(aCtrl).Width:= ChrWdt * 3;
+      TEdit(aCtrl).Width:= ChrWdt;
       TEdit(aCtrl).OnKeyPress:= @edtDimWKeyPress;
       TEdit(aCtrl).OnEditingDone:= @edtDimWEditingDone;
     end;
@@ -212,7 +183,7 @@ var
         TTrackBar(aCtrl).Frequency:= 5;
       end;
 
-      TTrackBar(aCtrl).Height:= lblDescription.Height * 3 div 2;
+      //TTrackBar(aCtrl).Height:= lblDescription.Height * 3 div 2;
 
       TTrackBar(aCtrl).Position:= 0;
       TTrackBar(aCtrl).OnChange:= @trbDimWChange;
@@ -241,7 +212,7 @@ begin
   Self.ModalResult:= mrNone;
   FGenText:= TStringBuilder.Create;
 
-  ChrWdt:= Canvas.TextWidth('W');//ширина большого символа
+  ChrWdt:= Canvas.TextWidth('0000');//ширина большого символа
   FNodeDimensionType:= ndtNone;
 
   trbDimW.Tag:= 1;
