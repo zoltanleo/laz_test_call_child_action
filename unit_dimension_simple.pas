@@ -41,6 +41,7 @@ type
     pnlMiddle: TPanel;
     pnlTop: TPanel;
     scbDimension: TScrollBox;
+    TrackBar1: TTrackBar;
     trbDimH: TTrackBar;
     trbDimTh: TTrackBar;
     trbDimW: TTrackBar;

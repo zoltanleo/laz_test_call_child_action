@@ -1,10 +1,10 @@
 object frmDimensionSimple: TfrmDimensionSimple
   Left = 398
-  Height = 373
+  Height = 536
   Top = 34
   Width = 706
   Caption = 'frmDimensionSimple'
-  ClientHeight = 373
+  ClientHeight = 536
   ClientWidth = 706
   DesignTimePPI = 144
   LCLVersion = '4.99.0.0'
@@ -21,13 +21,13 @@ object frmDimensionSimple: TfrmDimensionSimple
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 373
+    Height = 536
     Top = 0
     Width = 706
     HorzScrollBar.Page = 297
-    VertScrollBar.Page = 345
+    VertScrollBar.Page = 444
     Anchors = [akTop, akLeft, akRight, akBottom]
-    ClientHeight = 369
+    ClientHeight = 532
     ClientWidth = 702
     TabOrder = 0
     object pnlCommon: TPanel
@@ -38,12 +38,12 @@ object frmDimensionSimple: TfrmDimensionSimple
       AnchorSideBottom.Control = scbDimension
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 369
+      Height = 532
       Top = 0
       Width = 702
       Anchors = [akTop, akLeft, akRight, akBottom]
       Caption = 'pnlCommon'
-      ClientHeight = 369
+      ClientHeight = 532
       ClientWidth = 702
       TabOrder = 0
       object lblDescription: TLabel
@@ -64,12 +64,12 @@ object frmDimensionSimple: TfrmDimensionSimple
         AnchorSideRight.Control = pnlCommon
         AnchorSideRight.Side = asrBottom
         Left = 1
-        Height = 76
+        Height = 108
         Top = 50
         Width = 700
         Anchors = [akTop, akLeft, akRight]
         Caption = 'pnlTop'
-        ClientHeight = 76
+        ClientHeight = 108
         ClientWidth = 700
         Color = clMoneyGreen
         ParentBackground = False
@@ -126,12 +126,12 @@ object frmDimensionSimple: TfrmDimensionSimple
         AnchorSideRight.Control = pnlCommon
         AnchorSideRight.Side = asrBottom
         Left = 1
-        Height = 75
-        Top = 126
+        Height = 107
+        Top = 158
         Width = 700
         Anchors = [akTop, akLeft, akRight]
         Caption = 'pnlMiddle'
-        ClientHeight = 75
+        ClientHeight = 107
         ClientWidth = 700
         Color = clCream
         ParentBackground = False
@@ -189,12 +189,12 @@ object frmDimensionSimple: TfrmDimensionSimple
         AnchorSideRight.Control = pnlCommon
         AnchorSideRight.Side = asrBottom
         Left = 1
-        Height = 76
-        Top = 201
+        Height = 111
+        Top = 265
         Width = 700
         Anchors = [akTop, akLeft, akRight]
         Caption = 'pnlBottom'
-        ClientHeight = 76
+        ClientHeight = 111
         ClientWidth = 700
         Color = clAqua
         ParentBackground = False
@@ -253,7 +253,7 @@ object frmDimensionSimple: TfrmDimensionSimple
         AnchorSideBottom.Side = asrBottom
         Left = 576
         Height = 37
-        Top = 295
+        Top = 394
         Width = 113
         Anchors = [akTop, akRight]
         BorderSpacing.Top = 6
@@ -268,12 +268,27 @@ object frmDimensionSimple: TfrmDimensionSimple
         AnchorSideBottom.Side = asrBottom
         Left = 452
         Height = 37
-        Top = 295
+        Top = 394
         Width = 112
         Anchors = [akTop, akRight]
         BorderSpacing.Right = 12
         Caption = 'btnLeft'
         TabOrder = 4
+      end
+      object TrackBar1: TTrackBar
+        AnchorSideLeft.Control = pnlCommon
+        AnchorSideRight.Control = pnlCommon
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = pnlCommon
+        AnchorSideBottom.Side = asrBottom
+        Left = 13
+        Height = 38
+        Top = 481
+        Width = 676
+        Position = 0
+        Anchors = [akLeft, akRight, akBottom]
+        BorderSpacing.Around = 12
+        TabOrder = 5
       end
     end
   end
