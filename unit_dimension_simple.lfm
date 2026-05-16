@@ -93,6 +93,8 @@ object frmDimensionSimple: TfrmDimensionSimple
         object edtDimW: TEdit
           AnchorSideTop.Control = trbDimW
           AnchorSideRight.Control = lblDimW
+          AnchorSideBottom.Control = trbDimW
+          AnchorSideBottom.Side = asrBottom
           Left = 580
           Height = 33
           Top = 13
@@ -139,13 +141,12 @@ object frmDimensionSimple: TfrmDimensionSimple
         TabOrder = 1
         object trbDimH: TTrackBar
           AnchorSideLeft.Control = pnlMiddle
-          AnchorSideTop.Control = edtDimH
-          AnchorSideTop.Side = asrCenter
+          AnchorSideTop.Control = pnlMiddle
           AnchorSideRight.Control = edtDimH
           AnchorSideBottom.Side = asrBottom
           Left = 13
           Height = 34
-          Top = 12
+          Top = 13
           Width = 555
           Position = 0
           Anchors = [akTop, akLeft, akRight]
@@ -153,17 +154,14 @@ object frmDimensionSimple: TfrmDimensionSimple
           TabOrder = 0
         end
         object edtDimH: TEdit
-          AnchorSideTop.Control = pnlMiddle
+          AnchorSideTop.Control = trbDimH
+          AnchorSideTop.Side = asrCenter
           AnchorSideRight.Control = lblDimH
           Left = 580
           Height = 33
-          Top = 13
+          Top = 14
           Width = 75
           Anchors = [akTop, akRight]
-          BorderSpacing.Left = 6
-          BorderSpacing.Top = 12
-          BorderSpacing.Right = 6
-          BorderSpacing.Bottom = 24
           TabOrder = 1
           Text = 'edtDimH'
         end
@@ -175,9 +173,10 @@ object frmDimensionSimple: TfrmDimensionSimple
           AnchorSideBottom.Side = asrCenter
           Left = 661
           Height = 25
-          Top = 17
+          Top = 18
           Width = 26
           Anchors = [akTop, akRight]
+          BorderSpacing.Left = 6
           BorderSpacing.Right = 12
           Caption = 'мм'
         end
@@ -202,13 +201,12 @@ object frmDimensionSimple: TfrmDimensionSimple
         TabOrder = 2
         object trbDimTh: TTrackBar
           AnchorSideLeft.Control = pnlBottom
-          AnchorSideTop.Control = edtDimTh
-          AnchorSideTop.Side = asrCenter
+          AnchorSideTop.Control = pnlBottom
           AnchorSideRight.Control = edtDimTh
           AnchorSideBottom.Side = asrBottom
           Left = 13
           Height = 34
-          Top = 12
+          Top = 13
           Width = 555
           Position = 0
           Anchors = [akTop, akLeft, akRight]
@@ -218,15 +216,13 @@ object frmDimensionSimple: TfrmDimensionSimple
         object edtDimTh: TEdit
           AnchorSideTop.Control = pnlBottom
           AnchorSideRight.Control = lblDimTh
+          AnchorSideBottom.Control = trbDimTh
+          AnchorSideBottom.Side = asrBottom
           Left = 580
           Height = 33
-          Top = 13
+          Top = 14
           Width = 75
-          Anchors = [akTop, akRight]
-          BorderSpacing.Left = 6
-          BorderSpacing.Top = 12
-          BorderSpacing.Right = 6
-          BorderSpacing.Bottom = 24
+          Anchors = [akRight, akBottom]
           TabOrder = 1
           Text = 'edtDimTh'
         end
@@ -238,9 +234,10 @@ object frmDimensionSimple: TfrmDimensionSimple
           AnchorSideBottom.Side = asrCenter
           Left = 661
           Height = 25
-          Top = 17
+          Top = 18
           Width = 26
           Anchors = [akTop, akRight]
+          BorderSpacing.Left = 6
           BorderSpacing.Right = 12
           Caption = 'мм'
         end
